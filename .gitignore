@@ -1,0 +1,8 @@
+# Mac
+.DS_Store
+
+# Binaries
+bin/*
+
+# Env
+*.env
