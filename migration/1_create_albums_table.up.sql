@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS albums(
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(32),
+    description VARCHAR(256) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    cover_id INT DEFAULT NULL,
+    CONSTRAINT fk_cover
+    FOREIGN KEY (cover_id)
+    REFERENCES images(id)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+);

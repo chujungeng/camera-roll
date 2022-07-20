@@ -1,0 +1,9 @@
+{
+  "port": 9648,
+  "database": {
+    "address": "127.0.0.1:3306",
+    "user": "replace_with_your_db_username",
+    "password": "replace_with_your_db_password",
+    "name": "cameraroll"
+  }
+}

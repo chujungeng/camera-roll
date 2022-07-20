@@ -2,7 +2,7 @@
 .DS_Store
 
 # Binaries
-bin/*
+bin/
 
 # Env
-*.env
+.env
