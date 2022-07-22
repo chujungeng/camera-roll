@@ -3,17 +3,30 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	"github.com/google/uuid"
 
 	"chujungeng/camera-roll/pkg/cameraroll"
 )
 
 const (
-	ParamImageID = "imageID"
+	ParamImageID          = "imageID"
+	ParamImageTitle       = "title"
+	ParamImageDescription = "description"
+	ParamImageFile        = "image"
+)
+
+const (
+	MaxImageSize = 32 << 20
 )
 
 // ImageRouter specifies all the routes related to images
@@ -228,13 +241,73 @@ func (handler Handler) GetImages(w http.ResponseWriter, r *http.Request) {
 
 // AddImage adds a new image to the database
 func (handler Handler) AddImage(w http.ResponseWriter, r *http.Request) {
-	imageReq := ImageRequest{}
+	imageReq := ImageRequest{&cameraroll.Image{}}
 
-	// unmarshal new image from request
-	if err := render.Bind(r, &imageReq); err != nil {
-		render.Render(w, r, ErrInvalidRequest(err))
+	// // unmarshal new image from request
+	// if err := render.Bind(r, &imageReq); err != nil {
+	// 	render.Render(w, r, ErrInvalidRequest(err))
+	// 	return
+	// }
+
+	// parse the form from request
+	if err := r.ParseMultipartForm(MaxImageSize); err != nil {
+		panic(err)
+	}
+
+	// find title from form data
+	title := r.Form.Get(ParamImageTitle)
+	if len(title) > 0 {
+		imageReq.Title = title
+	}
+
+	// find description from form data
+	desc := r.Form.Get(ParamImageDescription)
+	if len(desc) > 0 {
+		imageReq.Description = desc
+	}
+
+	// find the image file from form data
+	imageFile, fileHeader, err := r.FormFile(ParamImageFile)
+	if err != nil {
+		panic(err)
+	}
+	defer imageFile.Close()
+
+	// read 512 bytes from the file for image validation
+	buff := make([]byte, 512)
+	if _, err = imageFile.Read(buff); err != nil {
+		panic(err)
+	}
+
+	// check if the uploaded file really is an image
+	if !strings.HasPrefix(http.DetectContentType(buff), "image") {
+		render.Render(w, r, ErrInvalidRequest(errors.New("invalid file type")))
 		return
 	}
+
+	// rewind the imageFile
+	imageFile.Seek(0, 0)
+
+	// find the image's file extension
+	fileNameSlice := strings.Split(fileHeader.Filename, ".")
+	fileType := fileNameSlice[len(fileNameSlice)-1]
+
+	// get a uuid for the file's new name
+	fileNameNew := fmt.Sprintf("%s.%s", uuid.New().String(), fileType)
+
+	// construct the file path
+	fileDest := filepath.Join(staticFilePath(), fileNameNew)
+
+	// copy the file to static asset folder
+	f, err := os.Create(fileDest)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	io.Copy(f, imageFile)
+
+	// update the image's path
+	imageReq.Path = fileNameNew
 
 	// add the new image to database
 	image := imageReq.Image

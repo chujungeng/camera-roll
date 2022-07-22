@@ -1,7 +1,10 @@
 package api
 
 import (
+	"errors"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -12,12 +15,29 @@ import (
 // other packages.
 type key int
 
+const (
+	staticFileFolder = "public"
+)
+
 // context keys
 const (
 	albumKey key = iota
 	tagKey
 	imageKey
 )
+
+func staticFilePath() string {
+	workDir, _ := os.Getwd()
+	fileDirPath := filepath.Join(workDir, staticFileFolder)
+	if _, err := os.Stat(fileDirPath); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(fileDirPath, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return fileDirPath
+}
 
 // ApiRouter handles RESTful API requests at /api
 func (handler Handler) ApiRouter() chi.Router {

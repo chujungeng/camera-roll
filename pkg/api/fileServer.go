@@ -1,10 +1,7 @@
 package api
 
 import (
-	"errors"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/go-chi/chi"
@@ -23,15 +20,7 @@ func FileServer(r chi.Router, path string, fileDir string) {
 	}
 	path += "*"
 
-	workDir, _ := os.Getwd()
-	fileDirPath := filepath.Join(workDir, fileDir)
-	if _, err := os.Stat(fileDirPath); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(fileDirPath, os.ModePerm)
-		if err != nil {
-			panic(err)
-		}
-	}
-
+	fileDirPath := staticFilePath()
 	root := http.Dir(fileDirPath)
 
 	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
