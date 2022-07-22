@@ -4,5 +4,8 @@
 # Binaries
 bin/
 
+# Site specific public files
+public/
+
 # Env
 .env

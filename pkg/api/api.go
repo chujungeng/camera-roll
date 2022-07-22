@@ -19,6 +19,7 @@ const (
 	imageKey
 )
 
+// ApiRouter handles RESTful API requests at /api
 func (handler Handler) ApiRouter() chi.Router {
 	r := chi.NewRouter()
 
@@ -32,6 +33,7 @@ func (handler Handler) ApiRouter() chi.Router {
 	return r
 }
 
+// Routes is the collection of all routes being served
 func (handler Handler) Routes() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -40,6 +42,10 @@ func (handler Handler) Routes() http.Handler {
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Mount("/api", handler.ApiRouter())
+
+	// Create a route along /assets that will serve contents from
+	// the ./public/ folder.
+	FileServer(r, "/assets", "public")
 
 	return r
 }
