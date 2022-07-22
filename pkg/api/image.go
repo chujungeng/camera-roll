@@ -26,7 +26,7 @@ const (
 )
 
 const (
-	MaxImageSize = 32 << 20
+	MaxImageSize = 2 << 20
 )
 
 // ImageRouter specifies all the routes related to images
