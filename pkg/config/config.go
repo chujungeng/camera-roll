@@ -25,10 +25,11 @@ const (
 )
 
 const (
-	addressKey  = "DB_ADDR"
-	userKey     = "DB_USER"
-	passwordKey = "DB_PASS"
-	nameKey     = "DB_NAME"
+	addressKey   = "DB_ADDR"
+	userKey      = "DB_USER"
+	passwordKey  = "DB_PASS"
+	nameKey      = "DB_NAME"
+	jwtSecretKey = "JWT_SECRET"
 )
 
 // DatabaseSettings contains the configs of the MySQL database that the server connects to
@@ -41,9 +42,10 @@ type DatabaseSettings struct {
 
 // Config contains all the configs this server requires
 type Config struct {
-	Mode     string
-	Port     uint              `json:"port"`
-	Database *DatabaseSettings `json:"database"`
+	Mode      string
+	Port      uint              `json:"port"`
+	JWTSecret string            `json:"jwt_secret"`
+	Database  *DatabaseSettings `json:"database"`
 }
 
 func (config *Config) loadFromFile() {
@@ -84,6 +86,11 @@ func (config *Config) loadFromEnv(suffix string) {
 	if len(name) > 0 {
 		config.Database.Name = name
 	}
+
+	jwtSecret := os.Getenv(jwtSecretKey + suffix)
+	if len(jwtSecret) > 0 {
+		config.JWTSecret = jwtSecret
+	}
 }
 
 func NewConfig() *Config {
@@ -101,11 +108,15 @@ func NewConfig() *Config {
 		suffix = "_DEV"
 	} else if mode == TestMode {
 		suffix = "_TEST"
+	} else {
+		// default to ProdMode
+		mode = ProdMode
 	}
 
+	// load .env file
 	godotenv.Load(envFile)
 
-	// load from environment variables
+	// override configs with values from environment variables
 	config.loadFromEnv(suffix)
 
 	config.Mode = mode

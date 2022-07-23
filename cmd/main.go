@@ -47,8 +47,13 @@ func main() {
 	defer dbService.Cleanup()
 
 	// Create a new handler
-	mysqlHandler := api.Handler{
-		Service: dbService,
+	mysqlHandler := api.NewHandler(dbService, options.JWTSecret)
+
+	// Print a JWT token for debug
+	if options.Mode != config.ProdMode {
+		testToken := mysqlHandler.GenerateTestJWT()
+		log.Printf("JWT Secret: %s", options.JWTSecret)
+		log.Printf("JWT: %s", testToken)
 	}
 
 	serverAddr := fmt.Sprintf(":%d", options.Port)

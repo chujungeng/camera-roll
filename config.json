@@ -1,5 +1,6 @@
 {
   "port": 9648,
+  "jwt_secret": "replace_with_your_jwt_secret",
   "database": {
     "address": "127.0.0.1:3306",
     "user": "replace_with_your_db_username",
