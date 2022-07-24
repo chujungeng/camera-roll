@@ -6,8 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 )
 
@@ -39,16 +40,42 @@ func staticFilePath() string {
 	return fileDirPath
 }
 
+// ApiRouterProtected contains secured routes that require admin access
+func (handler Handler) ApiRouterProtected() chi.Router {
+	r := chi.NewRouter()
+
+	// sub-routes
+	r.Mount("/albums", handler.AlbumRouterProtected())
+	r.Mount("/albumImages", handler.AlbumImageRouter())
+	r.Mount("/albumTags", handler.AlbumTagRouter())
+	r.Mount("/tags", handler.TagRouterProtected())
+	r.Mount("/images", handler.ImageRouterProtected())
+	r.Mount("/imageTags", handler.ImageTagRouter())
+
+	return r
+}
+
 // ApiRouter handles RESTful API requests at /api
 func (handler Handler) ApiRouter() chi.Router {
 	r := chi.NewRouter()
 
-	r.Mount("/albums", handler.AlbumRouter())
-	r.Mount("/albumImages", handler.AlbumImageRouter())
-	r.Mount("/albumTags", handler.AlbumTagRouter())
-	r.Mount("/tags", handler.TagRouter())
-	r.Mount("/images", handler.ImageRouter())
-	r.Mount("/imageTags", handler.ImageTagRouter())
+	// public routes
+	r.Group(func(r chi.Router) {
+		r.Mount("/albums", handler.AlbumRouterPublic())
+		r.Mount("/tags", handler.TagRouterPublic())
+		r.Mount("/images", handler.ImageRouterPublic())
+	})
+
+	// protected routes
+	r.Group(func(r chi.Router) {
+		// Seek, verify and validate JWT tokens
+		r.Use(jwtauth.Verifier(handler.jwtTokenAuth))
+
+		// Handle valid / invalid tokens
+		r.Use(AdminOnly)
+
+		r.Mount("/admin", handler.ApiRouterProtected())
+	})
 
 	return r
 }

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
 
@@ -29,20 +29,34 @@ const (
 	MaxImageSize = 2 << 20
 )
 
-// ImageRouter specifies all the routes related to images
-func (handler Handler) ImageRouter() chi.Router {
+// ImageRouterPublic specifies all the public routes related to images
+func (handler Handler) ImageRouterPublic() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/", handler.GetImages) // GET /images
-	r.Post("/", handler.AddImage) // POST /images
+
+	r.Route("/{imageID}", func(r chi.Router) {
+		r.Use(handler.ImageCtx)      // Load the *Image on the request context
+		r.Get("/", handler.GetImage) // GET /images/123
+	})
+
+	return r
+}
+
+// ImageRouterProtected specifies all the protected routes related to images
+func (handler Handler) ImageRouterProtected() chi.Router {
+	r := chi.NewRouter()
+
+	r.Get("/", handler.GetImages) // GET /admin/images
+	r.Post("/", handler.AddImage) // POST /admin/images
 
 	r.Route("/{imageID}", func(r chi.Router) {
 		r.Use(handler.ImageCtx)            // Load the *Image on the request context
-		r.Get("/", handler.GetImage)       // GET /images/123
-		r.Put("/", handler.UpdateImage)    // PUT /images/123
-		r.Delete("/", handler.DeleteImage) // DELETE /images/123
+		r.Get("/", handler.GetImage)       // GET /admin/images/123
+		r.Put("/", handler.UpdateImage)    // PUT /admin/images/123
+		r.Delete("/", handler.DeleteImage) // DELETE /admin/images/123
 
-		r.Delete("/tags/{tagID}", handler.RemoveTagFromImage) // DELETE /images/123/tags/789
+		r.Delete("/tags/{tagID}", handler.RemoveTagFromImage) // DELETE /admin/images/123/tags/789
 	})
 
 	return r

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
 	"chujungeng/camera-roll/pkg/cameraroll"
@@ -16,21 +16,37 @@ const (
 	ParamTagID = "tagID"
 )
 
-// TagRouter specifies all the routes related to tags
-func (handler Handler) TagRouter() chi.Router {
+// TagRouterPublic specifies all the public routes related to tags
+func (handler Handler) TagRouterPublic() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/", handler.GetTags) // GET /tags
-	r.Post("/", handler.AddTag) // POST /tags
+
+	r.Route("/{tagID}", func(r chi.Router) {
+		r.Use(handler.TagCtx)                      // Load the *Tag on the request context
+		r.Get("/", handler.GetTag)                 // GET /tags/123
+		r.Get("/albums", handler.GetAlbumsWithTag) // GET /tags/123/albums
+		r.Get("/images", handler.GetImagesWithTag) // GET /tags/123/images
+	})
+
+	return r
+}
+
+// TagRouterProtected specifies all the protected routes related to tags
+func (handler Handler) TagRouterProtected() chi.Router {
+	r := chi.NewRouter()
+
+	r.Get("/", handler.GetTags) // GET /admin/tags
+	r.Post("/", handler.AddTag) // POST /admin/tags
 
 	r.Route("/{tagID}", func(r chi.Router) {
 		r.Use(handler.TagCtx)            // Load the *Tag on the request context
-		r.Get("/", handler.GetTag)       // GET /tags/123
-		r.Put("/", handler.UpdateTag)    // PUT /tags/123
-		r.Delete("/", handler.DeleteTag) // DELETE /tags/123
+		r.Get("/", handler.GetTag)       // GET /admin/tags/123
+		r.Put("/", handler.UpdateTag)    // PUT /admin/tags/123
+		r.Delete("/", handler.DeleteTag) // DELETE /admin/tags/123
 
-		r.Get("/albums", handler.GetAlbumsWithTag) // GET /tags/123/albums
-		r.Get("/images", handler.GetImagesWithTag) // GET /tags/123/images
+		r.Get("/albums", handler.GetAlbumsWithTag) // GET /admin/tags/123/albums
+		r.Get("/images", handler.GetImagesWithTag) // GET /admin/tags/123/images
 	})
 
 	return r

@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
 	"chujungeng/camera-roll/pkg/cameraroll"
@@ -13,7 +13,7 @@ import (
 func (handler Handler) AlbumImageRouter() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/", handler.AddImageToAlbum) // POST /albumImages
+	r.Post("/", handler.AddImageToAlbum) // POST /admin/albumImages
 
 	return r
 }
