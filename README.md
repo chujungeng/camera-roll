@@ -31,57 +31,73 @@ They don't make sense in the world of aperture, shutter speed and ISO.
 
 (Not yet implemented)
 
-## API endpoints
+## API Endpoints
 
-/images  
-GET: get all images  
-POST: upload image  
+GET /images  
+get all images  
 
-/images/{imageID}  
-GET: get the image with id  
-PUT: modify image with id  
-DELETE: delete image with id  
+POST /admin/images  
+upload an image  
 
-/tags  
-GET: list all tags  
-POST: add a new tag  
+GET /images/{imageID}  
+get the image with id  
 
-/tags/{tagID}  
-PUT: modify tag with id  
-DELETE: delete tag with id  
+PUT /admin/images/{imageID}  
+modify image with id  
 
-/albums  
-GET: retrieve all albums  
-POST: add a new album with no pictures in it  
+DELETE /admin/images/{imageID}  
+delete image with id  
 
-/albums/{albumID}  
-GET: retrieve an album and its pictures  
-PUT: modify album info  
-DELETE: remove album  
+GET /tags  
+list all tags  
 
-/albums/{albumID}/images  
-GET: get all images from an album  
+POST /admin/tags  
+add a new tag  
 
-/albumImages  
-POST: add an image to the album  
+PUT /admin/tags/{tagID}  
+modify tag with id  
 
-/albums/{albumID}/images/{imageID}  
-DELETE: remove a picture from the album  
+DELETE /admin/tags/{tagID}  
+delete tag with id  
 
-/tags/{tagID}/albums  
-GET: get all albums under the tag  
+GET /albums  
+retrieve all albums  
 
-/albumTags  
-POST: add tag to the albums  
+POST /admin/albums  
+add a new album with no pictures in it  
 
-/tags/{tagID}/albums/{albumID}  
-DELETE: remove the tag from an album  
+GET /albums/{albumID}  
+get the album with albumID  
 
-/tags/{tagID}/images  
-GET: get all images under the tag  
+PUT /admin/albums/{albumID}  
+modify album info  
 
-/imageTags  
-POST: add tag to image  
+DELETE /admin/albums/{albumID}  
+remove album  
 
-/tags/{tagID}/images/{imageID}  
-DELETE: remove the tag from an image  
+GET /albums/{albumID}/images  
+get all images from an album  
+
+POST /admin/albumImages  
+add an image to the album  
+
+DELETE /admin/albums/{albumID}/images/{imageID}  
+remove a picture from the album  
+
+GET /tags/{tagID}/albums  
+get all albums under the tag  
+
+POST /admin/albumTags  
+add tag to the albums  
+
+DELETE /admin/tags/{tagID}/albums/{albumID}  
+remove the tag from an album  
+
+GET /tags/{tagID}/images  
+get all images under the tag with tagID  
+
+POST /admin/imageTags  
+add tag to image  
+
+DELETE /admin/tags/{tagID}/images/{imageID}  
+remove the tag from the image  

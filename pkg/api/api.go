@@ -88,7 +88,7 @@ func (handler Handler) Routes() http.Handler {
 	r.Use(middleware.URLFormat)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	r.Mount("/api", handler.ApiRouter())
+	r.Mount("/", handler.ApiRouter())
 
 	// Create a route along /assets that will serve contents from
 	// the ./public/ folder.
