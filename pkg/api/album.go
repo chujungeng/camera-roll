@@ -36,16 +36,16 @@ func (handler Handler) AlbumRouterPublic() chi.Router {
 func (handler Handler) AlbumRouterProtected() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/", handler.GetAlbums) // GET /albums
+	r.Get("/", handler.GetAlbums) // GET /admin/albums
 	r.Post("/", handler.AddAlbum) // POST /admin/albums
 
 	r.Route("/{albumID}", func(r chi.Router) {
 		r.Use(handler.AlbumCtx)            // Load the *Album on the request context
-		r.Get("/", handler.GetAlbum)       // GET /albums/123
+		r.Get("/", handler.GetAlbum)       // GET /admin/albums/123
 		r.Put("/", handler.UpdateAlbum)    // PUT /admin/albums/123
 		r.Delete("/", handler.DeleteAlbum) // DELETE /admin/albums/123
 
-		r.Get("/images", handler.GetImagesFromAlbum)                // GET /albums/123/images
+		r.Get("/images", handler.GetImagesFromAlbum)                // GET /admin/albums/123/images
 		r.Delete("/images/{imageID}", handler.RemoveImageFromAlbum) // DELETE /admin/albums/123/images/456
 
 		r.Delete("/tags/{tagID}", handler.RemoveTagFromAlbum) // DELETE /admin/albums/123/tags/789

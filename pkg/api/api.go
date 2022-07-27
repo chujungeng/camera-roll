@@ -55,7 +55,7 @@ func (handler Handler) ApiRouterProtected() chi.Router {
 	return r
 }
 
-// ApiRouter handles RESTful API requests at /api
+// ApiRouter handles RESTful API requests
 func (handler Handler) ApiRouter() chi.Router {
 	r := chi.NewRouter()
 

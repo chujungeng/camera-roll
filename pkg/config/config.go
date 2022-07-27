@@ -42,10 +42,13 @@ type DatabaseSettings struct {
 
 // Config contains all the configs this server requires
 type Config struct {
-	Mode      string
-	Port      uint              `json:"port"`
-	JWTSecret string            `json:"jwt_secret"`
-	Database  *DatabaseSettings `json:"database"`
+	Mode              string
+	Port              uint              `json:"port"`
+	JWTSecret         string            `json:"jwt_secret"`
+	OAuthClientID     string            `json:"oauth_client_id"`
+	OAuthClientSecret string            `json:"oauth_client_secret"`
+	AdminID           string            `json:"admin_account"`
+	Database          *DatabaseSettings `json:"database"`
 }
 
 func (config *Config) loadFromFile() {
