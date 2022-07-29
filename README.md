@@ -17,7 +17,7 @@ They don't make sense in the world of aperture, shutter speed and ISO.
 - headless CMS with RESTful APIs written in Go
 - organizes pictures into albums and tags
 - JSON Web Token(JWT) based access control
-- OAuth for admin access, no password required (Not yet implemented)
+- OAuth for admin access, no password required
 
 ## Dependencies
 

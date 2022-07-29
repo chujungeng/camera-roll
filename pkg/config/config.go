@@ -40,15 +40,21 @@ type DatabaseSettings struct {
 	Name     string `json:"name"`
 }
 
+// GoogleOAuthSettings contains information needed for Google OAuth2
+type GoogleOAuthSettings struct {
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	RedirectURL  string `json:"redirect_url"`
+}
+
 // Config contains all the configs this server requires
 type Config struct {
-	Mode              string
-	Port              uint              `json:"port"`
-	JWTSecret         string            `json:"jwt_secret"`
-	OAuthClientID     string            `json:"oauth_client_id"`
-	OAuthClientSecret string            `json:"oauth_client_secret"`
-	AdminID           string            `json:"admin_account"`
-	Database          *DatabaseSettings `json:"database"`
+	Mode        string
+	Port        uint                 `json:"port"`
+	JWTSecret   string               `json:"jwt_secret"`
+	AdminID     string               `json:"admin_account"`
+	GoogleOAuth *GoogleOAuthSettings `json:"google_oauth"`
+	Database    *DatabaseSettings    `json:"database"`
 }
 
 func (config *Config) loadFromFile() {

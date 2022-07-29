@@ -9,6 +9,9 @@ import (
 	"syscall"
 	"time"
 
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+
 	"chujungeng/camera-roll/pkg/api"
 	"chujungeng/camera-roll/pkg/config"
 	"chujungeng/camera-roll/pkg/mysql"
@@ -46,8 +49,17 @@ func main() {
 	}
 	defer dbService.Cleanup()
 
+	// Set up Google OAuth2
+	googleOauthConfig := &oauth2.Config{
+		RedirectURL:  options.GoogleOAuth.RedirectURL,
+		ClientID:     options.GoogleOAuth.ClientID,
+		ClientSecret: options.GoogleOAuth.ClientSecret,
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Endpoint:     google.Endpoint,
+	}
+
 	// Create a new handler
-	mysqlHandler := api.NewHandler(dbService, options.JWTSecret)
+	mysqlHandler := api.NewHandler(dbService, options.JWTSecret, options.AdminID, googleOauthConfig)
 
 	// Print a JWT token for debug
 	if options.Mode != config.ProdMode {

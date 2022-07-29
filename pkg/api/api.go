@@ -59,11 +59,14 @@ func (handler Handler) ApiRouterProtected() chi.Router {
 func (handler Handler) ApiRouter() chi.Router {
 	r := chi.NewRouter()
 
+	r.Use(render.SetContentType(render.ContentTypeJSON))
+
 	// public routes
 	r.Group(func(r chi.Router) {
 		r.Mount("/albums", handler.AlbumRouterPublic())
 		r.Mount("/tags", handler.TagRouterPublic())
 		r.Mount("/images", handler.ImageRouterPublic())
+		r.Mount("/auth", handler.AuthRouter())
 	})
 
 	// protected routes
@@ -86,7 +89,6 @@ func (handler Handler) Routes() http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.URLFormat)
-	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Mount("/", handler.ApiRouter())
 

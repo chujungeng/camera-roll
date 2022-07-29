@@ -1,9 +1,12 @@
 {
   "port": 9648,
   "jwt_secret": "replace_with_your_jwt_secret",
-  "oauth_client_id": "replace_with_your_oauth_client_id",
-  "oauth_client_secret": "replace_with_your_oauth_client_secret",
   "admin_account": "replace_with_your_gmail_address",
+  "google_oauth": {
+    "client_id": "replace_with_your_oauth_client_id",
+    "client_secret": "replace_with_your_oauth_client_secret",
+    "redirect_url": "replace_with_your_oauth_redirect_url"
+  },
   "database": {
     "address": "127.0.0.1:3306",
     "user": "replace_with_your_db_username",

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/go-chi/jwtauth/v5"
+	"golang.org/x/oauth2"
 
 	"chujungeng/camera-roll/pkg/cameraroll"
 )
@@ -17,14 +18,18 @@ const (
 type Handler struct {
 	Service cameraroll.Service
 
-	jwtTokenAuth *jwtauth.JWTAuth
+	jwtTokenAuth      *jwtauth.JWTAuth
+	adminID           string
+	googleOAuthConfig *oauth2.Config
 }
 
 // NewHandler is the contructor method for the Handler
-func NewHandler(service cameraroll.Service, jwtSecret string) *Handler {
+func NewHandler(service cameraroll.Service, jwtSecret string, admin string, oauthGoogleConfig *oauth2.Config) *Handler {
 	handler := Handler{
-		Service:      service,
-		jwtTokenAuth: jwtauth.New("HS256", []byte(jwtSecret), nil),
+		Service:           service,
+		jwtTokenAuth:      jwtauth.New("HS256", []byte(jwtSecret), nil),
+		adminID:           admin,
+		googleOAuthConfig: oauthGoogleConfig,
 	}
 
 	return &handler
