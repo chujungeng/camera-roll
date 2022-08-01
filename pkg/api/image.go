@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 
 	"chujungeng/camera-roll/pkg/cameraroll"
+	"chujungeng/camera-roll/pkg/url"
 )
 
 const (
@@ -321,7 +322,8 @@ func (handler Handler) AddImage(w http.ResponseWriter, r *http.Request) {
 	io.Copy(f, imageFile)
 
 	// update the image's path
-	imageReq.Path = fileNameNew
+	imagePath := url.Join(handler.rootURL, staticFileURL, fileNameNew)
+	imageReq.Path = imagePath
 
 	// add the new image to database
 	image := imageReq.Image

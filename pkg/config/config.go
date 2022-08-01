@@ -45,13 +45,13 @@ type DatabaseSettings struct {
 type GoogleOAuthSettings struct {
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
-	RedirectURL  string `json:"redirect_url"`
 }
 
 // Config contains all the configs this server requires
 type Config struct {
 	Mode        string
 	Port        uint                 `json:"port"`
+	RootURL     string               `json:"root_url"`
 	JWTSecret   string               `json:"jwt_secret"`
 	AdminID     string               `json:"admin_account"`
 	GoogleOAuth *GoogleOAuthSettings `json:"google_oauth"`

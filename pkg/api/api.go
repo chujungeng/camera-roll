@@ -18,6 +18,7 @@ type key int
 
 const (
 	staticFileFolder = "public"
+	staticFileURL    = "/assets"
 )
 
 // context keys
@@ -99,7 +100,7 @@ func (handler Handler) Routes() http.Handler {
 
 	// Create a route along /assets that will serve contents from
 	// the ./public/ folder.
-	FileServer(r, "/assets", http.Dir(staticFilePath()))
+	FileServer(r, staticFileURL, http.Dir(staticFilePath()))
 
 	return r
 }

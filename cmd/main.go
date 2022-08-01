@@ -15,6 +15,7 @@ import (
 	"chujungeng/camera-roll/pkg/api"
 	"chujungeng/camera-roll/pkg/config"
 	"chujungeng/camera-roll/pkg/mysql"
+	"chujungeng/camera-roll/pkg/url"
 )
 
 func main() {
@@ -51,7 +52,7 @@ func main() {
 
 	// Set up Google OAuth2
 	googleOauthConfig := &oauth2.Config{
-		RedirectURL:  options.GoogleOAuth.RedirectURL,
+		RedirectURL:  url.Join(options.RootURL, "/auth/google/callback"),
 		ClientID:     options.GoogleOAuth.ClientID,
 		ClientSecret: options.GoogleOAuth.ClientSecret,
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
@@ -59,7 +60,7 @@ func main() {
 	}
 
 	// Create a new handler
-	mysqlHandler := api.NewHandler(dbService, options.JWTSecret, options.AdminID, googleOauthConfig)
+	mysqlHandler := api.NewHandler(dbService, options.RootURL, options.JWTSecret, options.AdminID, googleOauthConfig)
 
 	// Print a JWT token for debug
 	if options.Mode != config.ProdMode {
