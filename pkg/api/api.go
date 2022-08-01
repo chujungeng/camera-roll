@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 )
@@ -99,7 +99,7 @@ func (handler Handler) Routes() http.Handler {
 
 	// Create a route along /assets that will serve contents from
 	// the ./public/ folder.
-	FileServer(r, "/assets", staticFileFolder)
+	FileServer(r, "/assets", http.Dir(staticFilePath()))
 
 	return r
 }
