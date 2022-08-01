@@ -22,10 +22,20 @@ They don't make sense in the world of aperture, shutter speed and ISO.
 ## Dependencies
 
 - MySQL 8.0
+- Google OAuth API
 
 ## Usage
 
-(Not yet implemented)
+Fill in the `config.json` file. 
+Replace everything starting with "replace_" with your actual environment info.  
+
+Compile the code:  
+`make`  
+This will create a new directory `./bin` with the application binary in it.  
+
+Run the application:  
+`cd ./bin`  
+`./cameraroll`  
 
 ## Example
 

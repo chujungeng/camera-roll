@@ -5,14 +5,15 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 )
 
-// path to json config file
-const path = "config.json"
+// name of json config file
+const filename = "config.json"
 
-// path to .env for development/test environment configs
+// name of the .env for development/test environment configs
 const envFile = ".env"
 
 // environment variable indicating whether it's running in dev/test/prod mode
@@ -58,9 +59,17 @@ type Config struct {
 }
 
 func (config *Config) loadFromFile() {
-	file, err := os.Open(path)
+	// find the path to current executable
+	ex, err := os.Executable()
 	if err != nil {
-		log.Printf("Failed to open config file [%s]. Error[%v]\n", path, err)
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+
+	// open config.json file
+	file, err := os.Open(filepath.Join(exPath, filename))
+	if err != nil {
+		log.Printf("Failed to open config file [%s]. Error[%v]\n", filename, err)
 		panic(err)
 	}
 
@@ -70,9 +79,15 @@ func (config *Config) loadFromFile() {
 
 	err = json.Unmarshal(bytes, &config)
 	if err != nil {
-		log.Printf("Failed to parse config file [%s]. Error[%v]\n", path, err)
+		log.Printf("Failed to parse config file [%s]. Error[%v]\n", filename, err)
 		panic(err)
 	}
+
+	// find the path to .env file
+	envPath := filepath.Join(exPath, envFile)
+
+	// load .env file
+	godotenv.Load(envPath)
 }
 
 func (config *Config) loadFromEnv(suffix string) {
@@ -121,9 +136,6 @@ func NewConfig() *Config {
 		// default to ProdMode
 		mode = ProdMode
 	}
-
-	// load .env file
-	godotenv.Load(envFile)
 
 	// override configs with values from environment variables
 	config.loadFromEnv(suffix)

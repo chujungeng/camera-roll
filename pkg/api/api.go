@@ -28,8 +28,13 @@ const (
 )
 
 func staticFilePath() string {
-	workDir, _ := os.Getwd()
-	fileDirPath := filepath.Join(workDir, staticFileFolder)
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+
+	fileDirPath := filepath.Join(exPath, staticFileFolder)
 	if _, err := os.Stat(fileDirPath); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(fileDirPath, os.ModePerm)
 		if err != nil {
@@ -94,7 +99,7 @@ func (handler Handler) Routes() http.Handler {
 
 	// Create a route along /assets that will serve contents from
 	// the ./public/ folder.
-	FileServer(r, "/assets", "public")
+	FileServer(r, "/assets", staticFileFolder)
 
 	return r
 }

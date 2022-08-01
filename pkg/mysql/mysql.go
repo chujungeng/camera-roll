@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
@@ -35,14 +37,25 @@ func Connect(user string, pass string, dbname string, address string) (*sql.DB, 
 
 // Migrate sets up database tables
 func Migrate(db *sql.DB) error {
+	const (
+		migrationDir = "migration"
+	)
+
 	if db == nil {
 		return fmt.Errorf("Migrate: null pointer error")
 	}
 
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+	migrationPath := fmt.Sprintf("file:///%s", filepath.Join(exPath, migrationDir))
+
 	driver, _ := mysql.WithInstance(db, &mysql.Config{})
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://migration",
+		migrationPath,
 		"mysql",
 		driver,
 	)

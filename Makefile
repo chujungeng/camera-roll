@@ -6,16 +6,21 @@ VERSION?=0.0.0
 
 all: build
 
-.PHONY: run build
+.PHONY: dev run build
 
-run: ## run in development mode
-	$(MODE)=dev $(GOCMD) run cmd/main.go
+dev: ## build and run in development mode
+	mkdir -p bin
+	cp config.json bin/
+	cp .env bin/
+	cp -r migration bin/
+	$(GOCMD) build -o bin/$(BINARY_NAME) cmd/main.go
+	$(MODE)=dev bin/$(BINARY_NAME)
 
 build: ## build in prod mode
 	mkdir -p bin
 	cp config.json bin/
 	cp -r migration bin/
-	$(MODE)=prod $(GOCMD) build -ldflags="-s -w" -o bin/$(BINARY_NAME) cmd/main.go
+	$(GOCMD) build -ldflags="-s -w" -o bin/$(BINARY_NAME) cmd/main.go
 
 clean: 
 	rm -rf ./bin
