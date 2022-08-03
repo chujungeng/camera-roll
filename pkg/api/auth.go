@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -79,29 +80,30 @@ func (handler Handler) oauthGoogleCallback(w http.ResponseWriter, r *http.Reques
 	oauthState, _ := r.Cookie("oauthstate")
 
 	if r.FormValue("state") != oauthState.Value {
-		log.Println("invalid oauth google state")
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		err := fmt.Errorf("invalid Google OAuth state: %s", r.FormValue("state"))
+		log.Println(err)
+		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
 	data, err := handler.getUserDataFromGoogle(r.FormValue("code"))
 	if err != nil {
 		log.Println(err.Error())
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
 	userData := GoogleOAuthData{}
 	if err := json.Unmarshal(data, &userData); err != nil {
 		log.Println(err.Error())
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
 	// check if the user is admin
 	if !(userData.VerifiedEmail && userData.Email == handler.adminID) {
 		log.Printf("Unauthorized access. UserData[%s]", data)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		render.Render(w, r, ErrUnauthorized(errors.New("unauthorized access")))
 		return
 	}
 

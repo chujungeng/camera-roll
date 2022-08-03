@@ -24,7 +24,16 @@ func ErrInvalidRequest(err error) render.Renderer {
 	return &ErrResponse{
 		Err:            err,
 		HTTPStatusCode: http.StatusBadRequest,
-		StatusText:     "Invalid request.",
+		StatusText:     "Invalid Request",
+		ErrorText:      err.Error(),
+	}
+}
+
+func ErrUnauthorized(err error) render.Renderer {
+	return &ErrResponse{
+		Err:            err,
+		HTTPStatusCode: http.StatusUnauthorized,
+		StatusText:     "Unauthorized Access",
 		ErrorText:      err.Error(),
 	}
 }
