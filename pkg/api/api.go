@@ -26,6 +26,7 @@ const (
 	albumKey key = iota
 	tagKey
 	imageKey
+	pageIDKey
 )
 
 func staticFilePath() string {

@@ -23,10 +23,10 @@ func (handler Handler) TagRouterPublic() chi.Router {
 	r.Get("/", handler.GetTags) // GET /tags
 
 	r.Route("/{tagID}", func(r chi.Router) {
-		r.Use(handler.TagCtx)                      // Load the *Tag on the request context
-		r.Get("/", handler.GetTag)                 // GET /tags/123
-		r.Get("/albums", handler.GetAlbumsWithTag) // GET /tags/123/albums
-		r.Get("/images", handler.GetImagesWithTag) // GET /tags/123/images
+		r.Use(handler.TagCtx)                                       // Load the *Tag on the request context
+		r.Get("/", handler.GetTag)                                  // GET /tags/123
+		r.With(Pagination).Get("/albums", handler.GetAlbumsWithTag) // GET /tags/123/albums
+		r.With(Pagination).Get("/images", handler.GetImagesWithTag) // GET /tags/123/images
 	})
 
 	return r
@@ -45,8 +45,8 @@ func (handler Handler) TagRouterProtected() chi.Router {
 		r.Put("/", handler.UpdateTag)    // PUT /admin/tags/123
 		r.Delete("/", handler.DeleteTag) // DELETE /admin/tags/123
 
-		r.Get("/albums", handler.GetAlbumsWithTag) // GET /admin/tags/123/albums
-		r.Get("/images", handler.GetImagesWithTag) // GET /admin/tags/123/images
+		r.With(Pagination).Get("/albums", handler.GetAlbumsWithTag) // GET /admin/tags/123/albums
+		r.With(Pagination).Get("/images", handler.GetImagesWithTag) // GET /admin/tags/123/images
 	})
 
 	return r
@@ -133,26 +133,10 @@ func (handler Handler) GetImagesWithTag(w http.ResponseWriter, r *http.Request) 
 	offset := PaginationDefaultOffset
 	limit := PaginationDefaultLimit
 
-	// try read offset from URL param
-	if param := chi.URLParam(r, ParamOffset); len(param) > 0 {
-		num, err := strconv.ParseUint(param, ParamNumberBase, ParamNumberBit)
-		if err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
-
-		offset = num
-	}
-
-	// try read limit from URL param
-	if param := chi.URLParam(r, ParamLimit); len(param) > 0 {
-		num, err := strconv.ParseUint(param, ParamNumberBase, ParamNumberBit)
-		if err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
-
-		limit = num
+	// find the pageID from context
+	page := r.Context().Value(pageIDKey).(int)
+	if page > 1 {
+		offset = PaginationDefaultLimit * (uint64(page) - 1)
 	}
 
 	tag := r.Context().Value(tagKey).(*cameraroll.Tag)
@@ -175,26 +159,10 @@ func (handler Handler) GetAlbumsWithTag(w http.ResponseWriter, r *http.Request) 
 	offset := PaginationDefaultOffset
 	limit := PaginationDefaultLimit
 
-	// try read offset from URL param
-	if param := chi.URLParam(r, ParamOffset); len(param) > 0 {
-		num, err := strconv.ParseUint(param, ParamNumberBase, ParamNumberBit)
-		if err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
-
-		offset = num
-	}
-
-	// try read limit from URL param
-	if param := chi.URLParam(r, ParamLimit); len(param) > 0 {
-		num, err := strconv.ParseUint(param, ParamNumberBase, ParamNumberBit)
-		if err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
-
-		limit = num
+	// find the pageID from context
+	page := r.Context().Value(pageIDKey).(int)
+	if page > 1 {
+		offset = PaginationDefaultLimit * (uint64(page) - 1)
 	}
 
 	tag := r.Context().Value(tagKey).(*cameraroll.Tag)

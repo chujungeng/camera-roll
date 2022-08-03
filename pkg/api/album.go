@@ -20,7 +20,7 @@ const (
 func (handler Handler) AlbumRouterPublic() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/", handler.GetAlbums) // GET /albums
+	r.With(Pagination).Get("/", handler.GetAlbums) // GET /albums
 
 	r.Route("/{albumID}", func(r chi.Router) {
 		r.Use(handler.AlbumCtx)      // Load the *Album on the request context
@@ -36,8 +36,8 @@ func (handler Handler) AlbumRouterPublic() chi.Router {
 func (handler Handler) AlbumRouterProtected() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/", handler.GetAlbums) // GET /admin/albums
-	r.Post("/", handler.AddAlbum) // POST /admin/albums
+	r.With(Pagination).Get("/", handler.GetAlbums) // GET /admin/albums
+	r.Post("/", handler.AddAlbum)                  // POST /admin/albums
 
 	r.Route("/{albumID}", func(r chi.Router) {
 		r.Use(handler.AlbumCtx)            // Load the *Album on the request context
@@ -250,26 +250,10 @@ func (handler Handler) GetAlbums(w http.ResponseWriter, r *http.Request) {
 	offset := PaginationDefaultOffset
 	limit := PaginationDefaultLimit
 
-	// try read offset from URL param
-	if param := chi.URLParam(r, ParamOffset); len(param) > 0 {
-		num, err := strconv.ParseUint(param, ParamNumberBase, ParamNumberBit)
-		if err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
-
-		offset = num
-	}
-
-	// try read limit from URL param
-	if param := chi.URLParam(r, ParamLimit); len(param) > 0 {
-		num, err := strconv.ParseUint(param, ParamNumberBase, ParamNumberBit)
-		if err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
-
-		limit = num
+	// find the pageID from context
+	page := r.Context().Value(pageIDKey).(int)
+	if page > 1 {
+		offset = PaginationDefaultLimit * (uint64(page) - 1)
 	}
 
 	// query the database for list of albums

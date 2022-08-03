@@ -11,6 +11,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
 	github.com/lestrrat-go/jwx v1.2.6
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	golang.org/x/oauth2 v0.0.0-20220722155238-128564f6959c
 )
 
@@ -27,7 +28,6 @@ require (
 	github.com/lestrrat-go/httpcc v1.0.0 // indirect
 	github.com/lestrrat-go/iter v1.0.1 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
-	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.7.2 // indirect
 	go.uber.org/atomic v1.7.0 // indirect

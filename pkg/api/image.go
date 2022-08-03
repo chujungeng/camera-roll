@@ -37,7 +37,7 @@ const (
 func (handler Handler) ImageRouterPublic() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/", handler.GetImages) // GET /images
+	r.With(Pagination).Get("/", handler.GetImages) // GET /images
 
 	r.Route("/{imageID}", func(r chi.Router) {
 		r.Use(handler.ImageCtx)      // Load the *Image on the request context
@@ -51,8 +51,8 @@ func (handler Handler) ImageRouterPublic() chi.Router {
 func (handler Handler) ImageRouterProtected() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/", handler.GetImages) // GET /admin/images
-	r.Post("/", handler.AddImage) // POST /admin/images
+	r.With(Pagination).Get("/", handler.GetImages) // GET /admin/images
+	r.Post("/", handler.AddImage)                  // POST /admin/images
 
 	r.Route("/{imageID}", func(r chi.Router) {
 		r.Use(handler.ImageCtx)            // Load the *Image on the request context
@@ -221,26 +221,10 @@ func (handler Handler) GetImages(w http.ResponseWriter, r *http.Request) {
 	offset := PaginationDefaultOffset
 	limit := PaginationDefaultLimit
 
-	// try read offset from URL param
-	if param := chi.URLParam(r, ParamOffset); len(param) > 0 {
-		num, err := strconv.ParseUint(param, ParamNumberBase, ParamNumberBit)
-		if err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
-
-		offset = num
-	}
-
-	// try read limit from URL param
-	if param := chi.URLParam(r, ParamLimit); len(param) > 0 {
-		num, err := strconv.ParseUint(param, ParamNumberBase, ParamNumberBit)
-		if err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
-
-		limit = num
+	// find the pageID from context
+	page := r.Context().Value(pageIDKey).(int)
+	if page > 1 {
+		offset = PaginationDefaultLimit * (uint64(page) - 1)
 	}
 
 	// query the database for list of images
