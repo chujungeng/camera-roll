@@ -65,7 +65,7 @@ func (service Service) GetImagesFromAlbum(ctx context.Context, id int64) ([]*cam
 	// parse response
 	for rows.Next() {
 		img := cameraroll.Image{}
-		if err := rows.Scan(&img.ID, &img.Path, &img.Title, &img.Description); err != nil {
+		if err := rows.Scan(&img.ID, &img.Path, &img.Thumbnail, &img.Title, &img.Description); err != nil {
 			return nil, fmt.Errorf("GetImagesFromAlbum id[%d]: %v", id, err)
 		}
 

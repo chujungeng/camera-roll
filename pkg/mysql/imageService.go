@@ -57,9 +57,10 @@ func (service Service) UpdateImageByID(ctx context.Context, id int64, newImg *ca
 	// execute the query
 	result, err := tx.ExecContext(ctx,
 		`UPDATE images 
-		SET path=?, title=?, description=? 
+		SET path=?, thumbnail=?, title=?, description=? 
 		WHERE id=?`,
 		newImg.Path,
+		newImg.Thumbnail,
 		newImg.Title,
 		newImg.Description,
 		id)
@@ -96,7 +97,7 @@ func (service Service) GetImageByID(ctx context.Context, id int64) (*cameraroll.
 	row := stmt.QueryRow(id)
 
 	// parse response
-	if err := row.Scan(&img.ID, &img.Path, &img.Title, &img.Description, &img.CreatedAt); err != nil {
+	if err := row.Scan(&img.ID, &img.Path, &img.Thumbnail, &img.Title, &img.Description, &img.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("GetImageByID[%d]: no such image", id)
 		}
@@ -131,7 +132,7 @@ func (service Service) GetImages(ctx context.Context, start uint64, count uint64
 	// parse response
 	for rows.Next() {
 		img := cameraroll.Image{}
-		if err := rows.Scan(&img.ID, &img.Path, &img.Title, &img.Description, &img.CreatedAt); err != nil {
+		if err := rows.Scan(&img.ID, &img.Path, &img.Thumbnail, &img.Title, &img.Description, &img.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetImages start[%d] count[%d]: %v", start, count, err)
 		}
 
@@ -158,9 +159,10 @@ func (service Service) AddImage(ctx context.Context, image *cameraroll.Image) er
 
 	// execute the query
 	result, err := tx.ExecContext(ctx,
-		`INSERT INTO images (path, title, description) 
-		VALUES (?, ?, ?)`,
+		`INSERT INTO images (path, thumbnail, title, description) 
+		VALUES (?, ?, ?, ?)`,
 		image.Path,
+		image.Thumbnail,
 		image.Title,
 		image.Description)
 

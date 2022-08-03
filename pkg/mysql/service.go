@@ -42,7 +42,7 @@ func (service *Service) createPreparedStmts() error {
 		keyQueryGetTagByID:   `SELECT * FROM tags WHERE id=?`,
 		keyQueryGetAlbums:    `SELECT * FROM albums ORDER BY created_at DESC LIMIT ?, ?`,
 		keyQueryGetAlbumByID: `SELECT * FROM albums WHERE id=?`,
-		keyQueryGetImagesFromAlbum: `SELECT images.id, images.path, images.title, images.description
+		keyQueryGetImagesFromAlbum: `SELECT images.id, images.path, images.thumbnail, images.title, images.description
 									FROM albums JOIN image_albums 
 									ON albums.id=image_albums.album_id 
 									JOIN images 
@@ -57,7 +57,7 @@ func (service *Service) createPreparedStmts() error {
 									WHERE tags.id=?
 									ORDER BY album_tags.id DESC
 									LIMIT ?, ?`,
-		keyQueryGetImagesWithTag: `SELECT images.id, images.path, images.title, images.description
+		keyQueryGetImagesWithTag: `SELECT images.id, images.path, images.thumbnail, images.title, images.description
 									FROM tags JOIN image_tags
 									ON tags.id=image_tags.tag_id
 									JOIN images

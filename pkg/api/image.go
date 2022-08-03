@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"image/jpeg"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,6 +16,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
+	"github.com/nfnt/resize"
 
 	"chujungeng/camera-roll/pkg/cameraroll"
 	"chujungeng/camera-roll/pkg/url"
@@ -254,6 +257,90 @@ func (handler Handler) GetImages(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func verifyImageFile(imageFile multipart.File) error {
+	// read 512 bytes from the file for image validation
+	buff := make([]byte, 512)
+	if _, err := imageFile.Read(buff); err != nil {
+		return err
+	}
+
+	// check if the uploaded file really is an image
+	if !strings.HasPrefix(http.DetectContentType(buff), "image") {
+		return errors.New("invalid file type")
+	}
+
+	// rewind the imageFile
+	imageFile.Seek(0, 0)
+
+	return nil
+}
+
+func saveImageFile(imageFile multipart.File, fileHeader *multipart.FileHeader) (string, error) {
+	// find the image's file extension
+	fileNameSlice := strings.Split(fileHeader.Filename, ".")
+	fileType := fileNameSlice[len(fileNameSlice)-1]
+
+	// get a uuid for the file's new name
+	fileNameNew := fmt.Sprintf("%s.%s", uuid.New().String(), fileType)
+
+	// construct the file path
+	fileDest := filepath.Join(staticFilePath(), fileNameNew)
+
+	// copy the file to static asset folder
+	f, err := os.Create(fileDest)
+	if err != nil {
+		return fileNameNew, err
+	}
+	defer f.Close()
+	io.Copy(f, imageFile)
+
+	// rewind the imageFile
+	imageFile.Seek(0, 0)
+
+	return fileNameNew, nil
+}
+
+func createImageThumbnail(imageFile multipart.File, fileHeader *multipart.FileHeader) (string, error) {
+	const (
+		ThumbnailMaxWidthPx  = 400
+		ThumbnailMaxHeightPx = 400
+	)
+
+	// find the image's file extension
+	fileNameSlice := strings.Split(fileHeader.Filename, ".")
+	fileType := fileNameSlice[len(fileNameSlice)-1]
+
+	// get a uuid for the thumbnail's filename
+	fileNameNew := fmt.Sprintf("%s.%s", uuid.New().String(), fileType)
+
+	// construct the file path
+	fileDest := filepath.Join(staticFilePath(), fileNameNew)
+
+	// open the destination file
+	f, err := os.Create(fileDest)
+	if err != nil {
+		return fileNameNew, err
+	}
+	defer f.Close()
+
+	// decode the original image
+	img, err := jpeg.Decode(imageFile)
+	if err != nil {
+		return fileNameNew, err
+	}
+
+	// create the thumbnail
+	thumb := resize.Thumbnail(ThumbnailMaxWidthPx, ThumbnailMaxHeightPx, img, resize.Lanczos3)
+
+	// save the thumbnail to static folder
+	jpeg.Encode(f, thumb, nil)
+
+	// rewind the imageFile
+	imageFile.Seek(0, 0)
+
+	return fileNameNew, nil
+}
+
 // AddImage adds a new image to the database
 func (handler Handler) AddImage(w http.ResponseWriter, r *http.Request) {
 	imageReq := ImageRequest{&cameraroll.Image{}}
@@ -266,7 +353,8 @@ func (handler Handler) AddImage(w http.ResponseWriter, r *http.Request) {
 
 	// parse the form from request
 	if err := r.ParseMultipartForm(MaxImageSize); err != nil {
-		panic(err)
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
 	}
 
 	// find title from form data
@@ -284,46 +372,38 @@ func (handler Handler) AddImage(w http.ResponseWriter, r *http.Request) {
 	// find the image file from form data
 	imageFile, fileHeader, err := r.FormFile(ParamImageFile)
 	if err != nil {
-		panic(err)
+		render.Render(w, r, ErrInvalidRequest(errors.New("image file was empty")))
+		return
 	}
 	defer imageFile.Close()
 
-	// read 512 bytes from the file for image validation
-	buff := make([]byte, 512)
-	if _, err = imageFile.Read(buff); err != nil {
-		panic(err)
-	}
-
-	// check if the uploaded file really is an image
-	if !strings.HasPrefix(http.DetectContentType(buff), "image") {
-		render.Render(w, r, ErrInvalidRequest(errors.New("invalid file type")))
+	// check if the uploaded file is an image
+	if err := verifyImageFile(imageFile); err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
-	// rewind the imageFile
-	imageFile.Seek(0, 0)
-
-	// find the image's file extension
-	fileNameSlice := strings.Split(fileHeader.Filename, ".")
-	fileType := fileNameSlice[len(fileNameSlice)-1]
-
-	// get a uuid for the file's new name
-	fileNameNew := fmt.Sprintf("%s.%s", uuid.New().String(), fileType)
-
-	// construct the file path
-	fileDest := filepath.Join(staticFilePath(), fileNameNew)
-
-	// copy the file to static asset folder
-	f, err := os.Create(fileDest)
+	// save the image to static folder
+	fileNameNew, err := saveImageFile(imageFile, fileHeader)
 	if err != nil {
-		panic(err)
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
 	}
-	defer f.Close()
-	io.Copy(f, imageFile)
+
+	// create a thumbnail
+	thumbnail, err := createImageThumbnail(imageFile, fileHeader)
+	if err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
 
 	// update the image's path
 	imagePath := url.Join(handler.rootURL, staticFileURL, fileNameNew)
 	imageReq.Path = imagePath
+
+	// update thumbnail path
+	thumbnailPath := url.Join(handler.rootURL, staticFileURL, thumbnail)
+	imageReq.Thumbnail = thumbnailPath
 
 	// add the new image to database
 	image := imageReq.Image

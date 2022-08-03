@@ -8,6 +8,7 @@ import (
 type Image struct {
 	ID          int64     `json:"id"`
 	Path        string    `json:"path"`
+	Thumbnail   string    `json:"thumbnail"`
 	Title       string    `json:"title,omitempty"`
 	Description string    `json:"description,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty"`

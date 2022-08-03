@@ -66,7 +66,7 @@ func (service Service) GetImagesWithTag(ctx context.Context, tagID int64, start 
 	// parse response
 	for rows.Next() {
 		img := cameraroll.Image{}
-		if err := rows.Scan(&img.ID, &img.Path, &img.Title, &img.Description); err != nil {
+		if err := rows.Scan(&img.ID, &img.Path, &img.Thumbnail, &img.Title, &img.Description); err != nil {
 			return nil, fmt.Errorf("GetImagesWithTag[%d] start[%d] count[%d]: %v", tagID, start, count, err)
 		}
 
