@@ -37,7 +37,7 @@ func NewHandler(service cameraroll.Service, rootURL string, jwtSecret string, ad
 	return &handler
 }
 
-// generateAdminJWT creates a JWT token whith admin claim
+// generateAdminJWT creates a JWT token that has a userRole of admin
 func (handler Handler) generateAdminJWT(expiresAt time.Time) (string, error) {
 	claims := map[string]interface{}{
 		JWTClaimUserRole: JWTClaimUserRoleAdmin,
