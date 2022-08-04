@@ -18,8 +18,16 @@ import (
 	"chujungeng/camera-roll/pkg/url"
 )
 
+var commit string
+
+func printVersionInfo() {
+	log.Printf("Commit Hash: %s", commit)
+}
+
 func main() {
 	defer log.Println("Goodbye!")
+
+	printVersionInfo()
 
 	// Create context that listens for the interrupt signal from the OS.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

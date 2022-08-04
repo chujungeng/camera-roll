@@ -9,13 +9,13 @@ It also supports customizable albums,
 which photographers may find useful to group together pictures from the same project.
 
 Again, this CMS is built for photographers.
-There is no WordPress jargon such as posts and users which were meant for blogs.
+There is no WordPress jargon such as posts and comments.
 They don't make sense in the world of aperture, shutter speed and ISO.
 
 ## Features
 
 - headless CMS with RESTful APIs written in Go
-- organizes pictures into albums and tags
+- image hosting that supports thumbnails, tags and albums
 - JSON Web Token(JWT) based access control
 - OAuth for admin access, no password required
 
@@ -26,8 +26,8 @@ They don't make sense in the world of aperture, shutter speed and ISO.
 
 ## Usage
 
-Fill in the `config.json` file. 
-Replace everything starting with "replace_" with your actual environment info.  
+Fill in the `config.json` file with your environment info.
+Presumably you already have a MySQL database and Google OAuth API set up. 
 
 Compile the code:  
 `make`  
@@ -39,7 +39,7 @@ Run the application:
 
 ## Example
 
-(Not yet implemented)
+[Here](https://photography.chujungeng.com/)'s a sample ReactJS frontend.
 
 ## API Endpoints
 
