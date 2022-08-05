@@ -68,7 +68,7 @@ func main() {
 	}
 
 	// Create a new handler
-	mysqlHandler := api.NewHandler(dbService, options.RootURL, options.JWTSecret, options.AdminID, googleOauthConfig)
+	mysqlHandler := api.NewHandler(dbService, options.RootURL, options.CorsOrigin, options.JWTSecret, options.AdminID, googleOauthConfig)
 
 	// Print a JWT token for debug
 	if options.Mode != config.ProdMode {

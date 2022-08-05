@@ -1,6 +1,7 @@
 {
   "port": 9648,
   "root_url": "http://localhost:9648/",
+  "cors_origin": ["http://*", "https://*"],
   "jwt_secret": "replace_with_your_jwt_secret",
   "admin_account": "replace_with_your_gmail_address",
   "google_oauth": {

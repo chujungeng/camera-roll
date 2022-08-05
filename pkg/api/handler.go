@@ -19,16 +19,18 @@ type Handler struct {
 	Service cameraroll.Service
 
 	rootURL           string
+	corsOrigin        []string
 	jwtTokenAuth      *jwtauth.JWTAuth
 	adminID           string
 	googleOAuthConfig *oauth2.Config
 }
 
 // NewHandler is the contructor method for the Handler
-func NewHandler(service cameraroll.Service, rootURL string, jwtSecret string, admin string, oauthGoogleConfig *oauth2.Config) *Handler {
+func NewHandler(service cameraroll.Service, rootURL string, corsOrigin []string, jwtSecret string, admin string, oauthGoogleConfig *oauth2.Config) *Handler {
 	handler := Handler{
 		Service:           service,
 		rootURL:           rootURL,
+		corsOrigin:        corsOrigin,
 		jwtTokenAuth:      jwtauth.New("HS256", []byte(jwtSecret), nil),
 		adminID:           admin,
 		googleOAuthConfig: oauthGoogleConfig,

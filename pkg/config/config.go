@@ -52,6 +52,7 @@ type Config struct {
 	Mode        string
 	Port        uint                 `json:"port"`
 	RootURL     string               `json:"root_url"`
+	CorsOrigin  []string             `json:"cors_origin"`
 	JWTSecret   string               `json:"jwt_secret"`
 	AdminID     string               `json:"admin_account"`
 	GoogleOAuth *GoogleOAuthSettings `json:"google_oauth"`
