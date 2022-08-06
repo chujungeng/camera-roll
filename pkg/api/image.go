@@ -284,7 +284,15 @@ func saveImageFile(imageFile multipart.File, fileHeader *multipart.FileHeader) (
 	return fileNameNew, nil
 }
 
-func createImageThumbnail(imageFile multipart.File, fileHeader *multipart.FileHeader) (string, error) {
+type ThumbnailStats struct {
+	Path            string
+	Width           int
+	Height          int
+	ThumbnailWidth  int
+	ThumbnailHeight int
+}
+
+func createImageThumbnail(imageFile multipart.File, fileHeader *multipart.FileHeader) (ThumbnailStats, error) {
 	const (
 		ThumbnailMaxWidthPx  = 400
 		ThumbnailMaxHeightPx = 400
@@ -303,14 +311,14 @@ func createImageThumbnail(imageFile multipart.File, fileHeader *multipart.FileHe
 	// open the destination file
 	f, err := os.Create(fileDest)
 	if err != nil {
-		return fileNameNew, err
+		return ThumbnailStats{Path: fileNameNew}, err
 	}
 	defer f.Close()
 
 	// decode the original image
 	img, err := jpeg.Decode(imageFile)
 	if err != nil {
-		return fileNameNew, err
+		return ThumbnailStats{Path: fileNameNew}, err
 	}
 
 	// create the thumbnail
@@ -322,7 +330,18 @@ func createImageThumbnail(imageFile multipart.File, fileHeader *multipart.FileHe
 	// rewind the imageFile
 	imageFile.Seek(0, 0)
 
-	return fileNameNew, nil
+	// get all the stats
+	width := img.Bounds().Dx()
+	height := img.Bounds().Dy()
+	thumbWidth := thumb.Bounds().Dx()
+	thumbHeight := thumb.Bounds().Dy()
+
+	return ThumbnailStats{
+		Path:            fileNameNew,
+		Width:           width,
+		Height:          height,
+		ThumbnailWidth:  thumbWidth,
+		ThumbnailHeight: thumbHeight}, nil
 }
 
 // AddImage adds a new image to the database
@@ -386,8 +405,14 @@ func (handler Handler) AddImage(w http.ResponseWriter, r *http.Request) {
 	imageReq.Path = imagePath
 
 	// update thumbnail path
-	thumbnailPath := url.Join(handler.rootURL, staticFileURL, thumbnail)
+	thumbnailPath := url.Join(handler.rootURL, staticFileURL, thumbnail.Path)
 	imageReq.Thumbnail = thumbnailPath
+
+	// update image stats
+	imageReq.Width = thumbnail.Width
+	imageReq.Height = thumbnail.Height
+	imageReq.ThumbnailWidth = thumbnail.ThumbnailWidth
+	imageReq.ThumbnailHeight = thumbnail.ThumbnailHeight
 
 	// add the new image to database
 	image := imageReq.Image

@@ -6,12 +6,16 @@ import (
 )
 
 type Image struct {
-	ID          int64     `json:"id"`
-	Path        string    `json:"path"`
-	Thumbnail   string    `json:"thumbnail"`
-	Title       string    `json:"title,omitempty"`
-	Description string    `json:"description,omitempty"`
-	CreatedAt   time.Time `json:"created_at,omitempty"`
+	ID              int64     `json:"id"`
+	Path            string    `json:"path"`
+	Width           int       `json:"width"`
+	Height          int       `json:"height"`
+	Thumbnail       string    `json:"thumbnail"`
+	ThumbnailWidth  int       `json:"width_thumb"`
+	ThumbnailHeight int       `json:"height_thumb"`
+	Title           string    `json:"title,omitempty"`
+	Description     string    `json:"description,omitempty"`
+	CreatedAt       time.Time `json:"created_at,omitempty"`
 }
 
 type ImageService interface {

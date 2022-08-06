@@ -57,10 +57,14 @@ func (service Service) UpdateImageByID(ctx context.Context, id int64, newImg *ca
 	// execute the query
 	result, err := tx.ExecContext(ctx,
 		`UPDATE images 
-		SET path=?, thumbnail=?, title=?, description=? 
+		SET path=?, width=?, height=?, thumbnail=?, width_thumb=?, height_thumb=?, title=?, description=? 
 		WHERE id=?`,
 		newImg.Path,
+		newImg.Width,
+		newImg.Height,
 		newImg.Thumbnail,
+		newImg.ThumbnailWidth,
+		newImg.ThumbnailHeight,
 		newImg.Title,
 		newImg.Description,
 		id)
@@ -97,7 +101,17 @@ func (service Service) GetImageByID(ctx context.Context, id int64) (*cameraroll.
 	row := stmt.QueryRow(id)
 
 	// parse response
-	if err := row.Scan(&img.ID, &img.Path, &img.Thumbnail, &img.Title, &img.Description, &img.CreatedAt); err != nil {
+	if err := row.Scan(
+		&img.ID,
+		&img.Path,
+		&img.Width,
+		&img.Height,
+		&img.Thumbnail,
+		&img.ThumbnailWidth,
+		&img.ThumbnailHeight,
+		&img.Title,
+		&img.Description,
+		&img.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("GetImageByID[%d]: no such image", id)
 		}
@@ -132,7 +146,17 @@ func (service Service) GetImages(ctx context.Context, start uint64, count uint64
 	// parse response
 	for rows.Next() {
 		img := cameraroll.Image{}
-		if err := rows.Scan(&img.ID, &img.Path, &img.Thumbnail, &img.Title, &img.Description, &img.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&img.ID,
+			&img.Path,
+			&img.Width,
+			&img.Height,
+			&img.Thumbnail,
+			&img.ThumbnailWidth,
+			&img.ThumbnailHeight,
+			&img.Title,
+			&img.Description,
+			&img.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetImages start[%d] count[%d]: %v", start, count, err)
 		}
 
@@ -159,10 +183,14 @@ func (service Service) AddImage(ctx context.Context, image *cameraroll.Image) er
 
 	// execute the query
 	result, err := tx.ExecContext(ctx,
-		`INSERT INTO images (path, thumbnail, title, description) 
-		VALUES (?, ?, ?, ?)`,
+		`INSERT INTO images (path, width, height, thumbnail, width_thumb, height_thumb, title, description) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		image.Path,
+		image.Width,
+		image.Height,
 		image.Thumbnail,
+		image.ThumbnailWidth,
+		image.ThumbnailHeight,
 		image.Title,
 		image.Description)
 

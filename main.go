@@ -46,7 +46,7 @@ func main() {
 	}
 	defer db.Close()
 
-	// Migrate database schema
+	// Run migrations
 	if err := mysql.Migrate(db); err != nil {
 		panic(err)
 	}
