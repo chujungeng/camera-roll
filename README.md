@@ -39,7 +39,10 @@ Run the application:
 
 ## Example
 
-[Here](https://photography.chujungeng.com/)'s a sample ReactJS frontend.
+Here's a sample ReactJS frontend: [https://photography.chujungeng.com/](https://photography.chujungeng.com/)  
+
+In case the above website was censored by your beloved motherland, here's a screenshot of it (you won't be able to see the screenshot either if my entire domain was censored):  
+![screenshot of sample frontend](https://chujungeng.com/cameraroll/assets/7b6581cc-2794-48c7-a879-12ea20f246df.jpg)  
 
 ## API Endpoints
 
