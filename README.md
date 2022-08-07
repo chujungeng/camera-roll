@@ -41,8 +41,13 @@ Run the application:
 
 Here's a sample ReactJS frontend: [https://photography.chujungeng.com/](https://photography.chujungeng.com/)  
 
-In case the above website was censored by your beloved motherland, here's a screenshot of it (you won't be able to see the screenshot either if my entire domain was censored):  
+In case the above website was censored by your beloved motherland, here're some screenshots of it (you won't be able to see the screenshots either if my entire domain was censored):  
+
+Photos with tag "travel":  
 ![screenshot of sample frontend](https://chujungeng.com/cameraroll/assets/7b6581cc-2794-48c7-a879-12ea20f246df.jpg)  
+
+Photos with tag "portrait":  
+![screenshot of sample frontend](https://chujungeng.com/cameraroll/assets/4e3da456-7bc8-403e-8cc2-30da9795162a.jpg)  
 
 ## API Endpoints
 
