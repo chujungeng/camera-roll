@@ -1,11 +1,69 @@
 package api
 
 import (
+	"errors"
+	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-chi/chi"
+
+	"chujungeng/camera-roll/pkg/url"
 )
+
+const (
+	staticFileFolder  = "public"
+	deletedFileFolder = "deleted"
+	staticFileURL     = "/assets"
+)
+
+func fileDirectoryPath(dirname string) string {
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+
+	fileDirPath := filepath.Join(exPath, dirname)
+	if _, err := os.Stat(fileDirPath); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(fileDirPath, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return fileDirPath
+}
+
+func StaticAssetURL() string {
+	return staticFileURL
+}
+
+func StaticFileDir() string {
+	return fileDirectoryPath(staticFileFolder)
+}
+
+func DeletedFileDir() string {
+	return fileDirectoryPath(deletedFileFolder)
+}
+
+func DeleteAssetFromFilesystem(assetURL string) {
+	relPath := url.GetPathFromURL(assetURL)
+	if len(relPath) == 0 {
+		return
+	}
+	file := strings.Replace(relPath, StaticAssetURL(), "", 1)
+
+	absPath := filepath.Join(StaticFileDir(), file)
+	newPath := filepath.Join(DeletedFileDir(), file)
+
+	if err := os.Rename(absPath, newPath); err != nil {
+		log.Println(err)
+		return
+	}
+}
 
 // FsWithoutDirListing is Go's filesystem with directory listing turned off
 type FsWithoutDirListing struct {

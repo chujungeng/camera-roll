@@ -2,7 +2,7 @@ package config
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -76,7 +76,7 @@ func (config *Config) loadFromFile() {
 
 	defer file.Close()
 
-	bytes, _ := ioutil.ReadAll(file)
+	bytes, _ := io.ReadAll(file)
 
 	err = json.Unmarshal(bytes, &config)
 	if err != nil {

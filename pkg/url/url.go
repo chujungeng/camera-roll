@@ -14,3 +14,13 @@ func Join(base string, paths ...string) string {
 
 	return p
 }
+
+func GetPathFromURL(urlStr string) string {
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	return u.Path
+}

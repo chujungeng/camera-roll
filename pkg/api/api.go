@@ -1,10 +1,7 @@
 package api
 
 import (
-	"errors"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -17,11 +14,6 @@ import (
 // other packages.
 type key int
 
-const (
-	staticFileFolder = "public"
-	staticFileURL    = "/assets"
-)
-
 // context keys
 const (
 	albumKey key = iota
@@ -29,24 +21,6 @@ const (
 	imageKey
 	pageIDKey
 )
-
-func staticFilePath() string {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exPath := filepath.Dir(ex)
-
-	fileDirPath := filepath.Join(exPath, staticFileFolder)
-	if _, err := os.Stat(fileDirPath); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(fileDirPath, os.ModePerm)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	return fileDirPath
-}
 
 // ApiRouterProtected contains secured routes that require admin access
 func (handler Handler) ApiRouterProtected() chi.Router {
@@ -113,7 +87,7 @@ func (handler Handler) Routes() http.Handler {
 
 	// Create a route along /assets that will serve contents from
 	// the ./public/ folder.
-	FileServer(r, staticFileURL, http.Dir(staticFilePath()))
+	FileServer(r, staticFileURL, http.Dir(StaticFileDir()))
 
 	return r
 }

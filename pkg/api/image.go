@@ -180,6 +180,9 @@ func (handler Handler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	DeleteAssetFromFilesystem(image.Path)
+	DeleteAssetFromFilesystem(image.Thumbnail)
+
 	render.Status(r, http.StatusOK)
 }
 
@@ -268,7 +271,7 @@ func saveImageFile(imageFile multipart.File, fileHeader *multipart.FileHeader) (
 	fileNameNew := fmt.Sprintf("%s.%s", uuid.New().String(), fileType)
 
 	// construct the file path
-	fileDest := filepath.Join(staticFilePath(), fileNameNew)
+	fileDest := filepath.Join(StaticFileDir(), fileNameNew)
 
 	// copy the file to static asset folder
 	f, err := os.Create(fileDest)
@@ -306,7 +309,7 @@ func createImageThumbnail(imageFile multipart.File, fileHeader *multipart.FileHe
 	fileNameNew := fmt.Sprintf("%s.%s", uuid.New().String(), fileType)
 
 	// construct the file path
-	fileDest := filepath.Join(staticFilePath(), fileNameNew)
+	fileDest := filepath.Join(StaticFileDir(), fileNameNew)
 
 	// open the destination file
 	f, err := os.Create(fileDest)
