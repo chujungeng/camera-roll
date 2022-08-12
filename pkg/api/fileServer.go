@@ -50,11 +50,21 @@ func DeletedFileDir() string {
 }
 
 func DeleteAssetFromFilesystem(assetURL string) {
+	const (
+		urlDelimiter = "/"
+	)
+
 	relPath := url.GetPathFromURL(assetURL)
 	if len(relPath) == 0 {
 		return
 	}
-	file := strings.Replace(relPath, StaticAssetURL(), "", 1)
+
+	elements := strings.Split(relPath, urlDelimiter)
+	if len(elements) == 0 {
+		return
+	}
+
+	file := elements[len(elements)-1]
 
 	absPath := filepath.Join(StaticFileDir(), file)
 	newPath := filepath.Join(DeletedFileDir(), file)
