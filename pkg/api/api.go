@@ -48,7 +48,7 @@ func (handler Handler) ApiRouter() chi.Router {
 		r.Mount("/albums", handler.AlbumRouterPublic())
 		r.Mount("/tags", handler.TagRouterPublic())
 		r.Mount("/images", handler.ImageRouterPublic())
-		r.Mount("/auth", handler.AuthRouter())
+		r.Mount("/token", handler.TokenRouter())
 	})
 
 	// protected routes

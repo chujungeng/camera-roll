@@ -1,17 +1,10 @@
 package api
 
 import (
-	"time"
-
 	"github.com/go-chi/jwtauth/v5"
 	"golang.org/x/oauth2"
 
 	"chujungeng/camera-roll/pkg/cameraroll"
-)
-
-const (
-	JWTClaimUserRole      string = "user_role"
-	JWTClaimUserRoleAdmin string = "admin"
 )
 
 // Handler handles all API requests to camera roll
@@ -37,27 +30,4 @@ func NewHandler(service cameraroll.Service, rootURL string, corsOrigin []string,
 	}
 
 	return &handler
-}
-
-// generateAdminJWT creates a JWT token that has a userRole of admin
-func (handler Handler) generateAdminJWT(expiresAt time.Time) (string, error) {
-	claims := map[string]interface{}{
-		JWTClaimUserRole: JWTClaimUserRoleAdmin,
-	}
-
-	jwtauth.SetExpiry(claims, expiresAt)
-	_, tokenString, err := handler.jwtTokenAuth.Encode(claims)
-
-	return tokenString, err
-}
-
-// GenerateTestJWT creates a JWT token for debugging purposes
-func (handler Handler) GenerateTestJWT() string {
-	const (
-		testTokenExpires = 30 * time.Minute
-	)
-
-	tokenString, _ := handler.generateAdminJWT(time.Now().Add(testTokenExpires))
-
-	return tokenString
 }
