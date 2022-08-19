@@ -53,8 +53,17 @@ func (service Service) GetAlbumsWithTag(ctx context.Context, tagID int64, start 
 		return nil, fmt.Errorf("GetAlbumsWithTag[%d] start[%d] count[%d]: Cannot find prepared sql query", tagID, start, count)
 	}
 
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetAlbumsWithTag[%d] start[%d] count[%d]: %v", tagID, start, count, err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
 	// execute the query
-	rows, err := stmt.Query(tagID, start, count)
+	rows, err := txStmt.QueryContext(ctx, tagID, start, count)
 
 	// check if the query failed
 	if err != nil {
@@ -72,6 +81,11 @@ func (service Service) GetAlbumsWithTag(ctx context.Context, tagID int64, start 
 
 		// add album to the return slice
 		albums = append(albums, &alb)
+	}
+
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("GetAlbumsWithTag[%d] start[%d] count[%d]: %v", tagID, start, count, err)
 	}
 
 	// query database for album covers

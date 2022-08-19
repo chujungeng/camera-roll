@@ -90,8 +90,17 @@ func (service Service) GetTagByID(ctx context.Context, id int64) (*cameraroll.Ta
 		return nil, fmt.Errorf("GetTagByID: Cannot find prepared sql query")
 	}
 
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetTagByID[%d]: %v", id, err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
 	// execute the query
-	row := stmt.QueryRow(id)
+	row := txStmt.QueryRowContext(ctx, id)
 
 	// parse response
 	if err := row.Scan(&tag.ID, &tag.Name); err != nil {
@@ -99,6 +108,11 @@ func (service Service) GetTagByID(ctx context.Context, id int64) (*cameraroll.Ta
 			return nil, fmt.Errorf("GetTagByID[%d]: no such tag", id)
 		}
 
+		return nil, fmt.Errorf("GetTagByID[%d]: %v", id, err)
+	}
+
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
 		return nil, fmt.Errorf("GetTagByID[%d]: %v", id, err)
 	}
 
@@ -116,8 +130,17 @@ func (service Service) GetTags(ctx context.Context) ([]*cameraroll.Tag, error) {
 		return nil, fmt.Errorf("GetTags: Cannot find prepared sql query")
 	}
 
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetTags: %v", err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
 	// execute the query
-	rows, err := stmt.Query()
+	rows, err := txStmt.QueryContext(ctx)
 
 	// check if the query failed
 	if err != nil {
@@ -135,6 +158,11 @@ func (service Service) GetTags(ctx context.Context) ([]*cameraroll.Tag, error) {
 
 		// add tag to the return slice
 		tags = append(tags, &tag)
+	}
+
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("GetTags: %v", err)
 	}
 
 	return tags, nil

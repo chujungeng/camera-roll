@@ -92,8 +92,17 @@ func (service Service) GetAlbumByID(ctx context.Context, id int64) (*cameraroll.
 		return nil, fmt.Errorf("GetAlbumByID [%d]: Cannot find prepared sql query", id)
 	}
 
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetAlbumByID [%d]: Cannot start a database transaction. err[%v]", id, err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
 	// execute the query
-	row := stmt.QueryRow(id)
+	row := txStmt.QueryRowContext(ctx, id)
 
 	// parse response
 	if err := row.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CreatedAt, &alb.CoverID); err != nil {
@@ -101,6 +110,11 @@ func (service Service) GetAlbumByID(ctx context.Context, id int64) (*cameraroll.
 			return nil, fmt.Errorf("GetAlbumByID[%d]: no such album", id)
 		}
 
+		return nil, fmt.Errorf("GetAlbumByID[%d]: %v", id, err)
+	}
+
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
 		return nil, fmt.Errorf("GetAlbumByID[%d]: %v", id, err)
 	}
 
@@ -126,8 +140,17 @@ func (service Service) GetAlbums(ctx context.Context, start uint64, count uint64
 		return nil, fmt.Errorf("GetAlbums start[%d] count[%d]: Cannot find prepared sql query", start, count)
 	}
 
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetAlbums start[%d] count[%d]: Cannot start a database transaction. err[%v]", start, count, err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
 	// execute the query
-	rows, err := stmt.Query(start, count)
+	rows, err := txStmt.QueryContext(ctx, start, count)
 
 	// check if the query failed
 	if err != nil {
@@ -145,6 +168,11 @@ func (service Service) GetAlbums(ctx context.Context, start uint64, count uint64
 
 		// add album to the return slice
 		albums = append(albums, &alb)
+	}
+
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("GetAlbums start[%d] count[%d]: %v", start, count, err)
 	}
 
 	// query database for album covers

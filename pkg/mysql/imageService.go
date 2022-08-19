@@ -97,8 +97,17 @@ func (service Service) GetImageByID(ctx context.Context, id int64) (*cameraroll.
 		return nil, fmt.Errorf("GetImageByID [%d]: Cannot find prepared sql query", id)
 	}
 
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetImageByID[%d]: %v", id, err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
 	// execute the query
-	row := stmt.QueryRow(id)
+	row := txStmt.QueryRowContext(ctx, id)
 
 	// parse response
 	if err := row.Scan(
@@ -119,6 +128,11 @@ func (service Service) GetImageByID(ctx context.Context, id int64) (*cameraroll.
 		return nil, fmt.Errorf("GetImageByID[%d]: %v", id, err)
 	}
 
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("GetImageByID[%d]: %v", id, err)
+	}
+
 	return &img, nil
 }
 
@@ -133,8 +147,17 @@ func (service Service) GetImages(ctx context.Context, start uint64, count uint64
 		return nil, fmt.Errorf("GetImages start[%d] count[%d]: Cannot find prepared sql query", start, count)
 	}
 
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetImages start[%d] count[%d]: %v", start, count, err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
 	// execute the query
-	rows, err := stmt.Query(start, count)
+	rows, err := txStmt.QueryContext(ctx, start, count)
 
 	// check if the query failed
 	if err != nil {
@@ -162,6 +185,11 @@ func (service Service) GetImages(ctx context.Context, start uint64, count uint64
 
 		// add image to the return slice
 		images = append(images, &img)
+	}
+
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("GetImages start[%d] count[%d]: %v", start, count, err)
 	}
 
 	return images, nil

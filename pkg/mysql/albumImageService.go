@@ -52,8 +52,17 @@ func (service Service) GetImagesFromAlbum(ctx context.Context, id int64) ([]*cam
 		return nil, fmt.Errorf("GetImagesFromAlbum id[%d]: Cannot find prepared sql query", id)
 	}
 
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetImagesFromAlbum id[%d]: Cannot start a database transaction. err[%v]", id, err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
 	// execute the query
-	rows, err := stmt.Query(id)
+	rows, err := txStmt.QueryContext(ctx, id)
 
 	// check if the query failed
 	if err != nil {
@@ -81,6 +90,11 @@ func (service Service) GetImagesFromAlbum(ctx context.Context, id int64) ([]*cam
 
 		// add image to the return slice
 		images = append(images, &img)
+	}
+
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("GetImagesFromAlbum id[%d]: %v", id, err)
 	}
 
 	return images, nil
