@@ -66,7 +66,7 @@ func (service Service) GetAlbumsWithTag(ctx context.Context, tagID int64, start 
 	// parse response
 	for rows.Next() {
 		alb := cameraroll.Album{}
-		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CoverID); err != nil {
+		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CreatedAt, &alb.CoverID); err != nil {
 			return nil, fmt.Errorf("GetAlbumsWithTag[%d] start[%d] count[%d]: %v", tagID, start, count, err)
 		}
 

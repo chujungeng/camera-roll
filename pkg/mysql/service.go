@@ -49,7 +49,7 @@ func (service *Service) createPreparedStmts() error {
 									ON image_albums.image_id=images.id 
 									WHERE albums.id=?
 									ORDER BY image_albums.id DESC`,
-		keyQueryGetAlbumsWithTag: `SELECT albums.id, albums.title, albums.description, albums.cover_id
+		keyQueryGetAlbumsWithTag: `SELECT albums.id, albums.title, albums.description, albums.created_at, albums.cover_id
 									FROM tags JOIN album_tags
 									ON tags.id=album_tags.tag_id
 									JOIN albums
