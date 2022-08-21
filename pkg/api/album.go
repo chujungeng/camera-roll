@@ -27,6 +27,7 @@ func (handler Handler) AlbumRouterPublic() chi.Router {
 		r.Get("/", handler.GetAlbum) // GET /albums/123
 
 		r.Get("/images", handler.GetImagesFromAlbum) // GET /albums/123/images
+		r.Get("/tags", handler.GetTagsOfAlbum)       // GET /albums/123/tags
 	})
 
 	return r
@@ -48,6 +49,7 @@ func (handler Handler) AlbumRouterProtected() chi.Router {
 		r.Get("/images", handler.GetImagesFromAlbum)                // GET /admin/albums/123/images
 		r.Delete("/images/{imageID}", handler.RemoveImageFromAlbum) // DELETE /admin/albums/123/images/456
 
+		r.Get("/tags", handler.GetTagsOfAlbum)                // GET /admin/albums/123/tags
 		r.Delete("/tags/{tagID}", handler.RemoveTagFromAlbum) // DELETE /admin/albums/123/tags/789
 	})
 
@@ -155,6 +157,22 @@ func (handler Handler) RemoveTagFromAlbum(w http.ResponseWriter, r *http.Request
 	}
 
 	render.Status(r, http.StatusOK)
+}
+
+// GetTagsOfAlbum returns all the tags associated with an album
+func (handler Handler) GetTagsOfAlbum(w http.ResponseWriter, r *http.Request) {
+	album := r.Context().Value(albumKey).(*cameraroll.Album)
+
+	tags, err := handler.Service.GetTagsOfAlbum(r.Context(), album.ID)
+	if err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	if err := render.RenderList(w, r, NewTagListResponse(tags)); err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 }
 
 // RemoveImageFromAlbum removes an image from the album

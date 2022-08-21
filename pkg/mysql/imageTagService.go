@@ -41,6 +41,55 @@ func (service Service) RemoveTagFromImage(ctx context.Context, imageID int64, ta
 	return nil
 }
 
+// GetTagsOfImage finds all the tags that are associated to the image
+func (service Service) GetTagsOfImage(ctx context.Context, imageID int64) ([]*cameraroll.Tag, error) {
+	// Tag slice to hold the data from database query
+	tags := []*cameraroll.Tag{}
+
+	// find prepared statement
+	stmt := service.preparedStmts[keyQueryGetTagsOfImage]
+	if stmt == nil {
+		return nil, fmt.Errorf("GetTagsOfImage[%d]: Cannot find prepared sql query", imageID)
+	}
+
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetTagsOfImage[%d]: %v", imageID, err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
+	// execute the query
+	rows, err := txStmt.QueryContext(ctx, imageID)
+
+	// check if the query failed
+	if err != nil {
+		return nil, fmt.Errorf("GetTagsOfImage[%d]: %v", imageID, err)
+	}
+
+	defer rows.Close()
+
+	// parse response
+	for rows.Next() {
+		tag := cameraroll.Tag{}
+		if err := rows.Scan(&tag.ID, &tag.Name); err != nil {
+			return nil, fmt.Errorf("GetTagsOfImage[%d]: %v", imageID, err)
+		}
+
+		// add tag to the return slice
+		tags = append(tags, &tag)
+	}
+
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("GetTagsOfImage[%d]: %v", imageID, err)
+	}
+
+	return tags, nil
+}
+
 // GetImagesWithTag queries the database for certain amount of images under a tag specified by tagID
 // returns a slice of images on success
 func (service Service) GetImagesWithTag(ctx context.Context, tagID int64, start uint64, count uint64) ([]*cameraroll.Image, error) {

@@ -11,5 +11,6 @@ type AlbumTag struct {
 type AlbumTagService interface {
 	AddTagToAlbum(ctx context.Context, albumID int64, tagID int64) error
 	GetAlbumsWithTag(ctx context.Context, tagID int64, start uint64, count uint64) ([]*Album, error)
+	GetTagsOfAlbum(ctx context.Context, albumID int64) ([]*Tag, error)
 	RemoveTagFromAlbum(ctx context.Context, albumID int64, tagID int64) error
 }

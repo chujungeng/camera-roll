@@ -101,6 +101,55 @@ func (service Service) GetAlbumsWithTag(ctx context.Context, tagID int64, start 
 	return albums, nil
 }
 
+// GetTagsOfAlbum finds all the tags that are associated to the album
+func (service Service) GetTagsOfAlbum(ctx context.Context, albumID int64) ([]*cameraroll.Tag, error) {
+	// Tag slice to hold the data from database query
+	tags := []*cameraroll.Tag{}
+
+	// find prepared statement
+	stmt := service.preparedStmts[keyQueryGetTagsOfAlbum]
+	if stmt == nil {
+		return nil, fmt.Errorf("GetTagsOfAlbum[%d]: Cannot find prepared sql query", albumID)
+	}
+
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetTagsOfAlbum[%d]: %v", albumID, err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
+	// execute the query
+	rows, err := txStmt.QueryContext(ctx, albumID)
+
+	// check if the query failed
+	if err != nil {
+		return nil, fmt.Errorf("GetTagsOfAlbum[%d]: %v", albumID, err)
+	}
+
+	defer rows.Close()
+
+	// parse response
+	for rows.Next() {
+		tag := cameraroll.Tag{}
+		if err := rows.Scan(&tag.ID, &tag.Name); err != nil {
+			return nil, fmt.Errorf("GetTagsOfAlbum[%d]: %v", albumID, err)
+		}
+
+		// add tag to the return slice
+		tags = append(tags, &tag)
+	}
+
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("GetTagsOfAlbum[%d]: %v", albumID, err)
+	}
+
+	return tags, nil
+}
+
 // AddTagToAlbum adds a tag to an album
 func (service Service) AddTagToAlbum(ctx context.Context, albumID int64, tagID int64) error {
 	// start a transaction

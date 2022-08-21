@@ -19,8 +19,11 @@ const (
 	keyQueryGetAlbums          = "GetAlbums"
 	keyQueryGetAlbumByID       = "GetAlbumByID"
 	keyQueryGetImagesFromAlbum = "GetImagesFromAlbum"
+	keyQueryGetAlbumsOfImage   = "GetAlbumsOfImage"
 	keyQueryGetAlbumsWithTag   = "GetAlbumsWithTag"
+	keyQueryGetTagsOfAlbum     = "GetTagsOfAlbum"
 	keyQueryGetImagesWithTag   = "GetImagesWithTag"
+	keyQueryGetTagsOfImage     = "GetTagsOfImage"
 )
 
 type Service struct {
@@ -49,6 +52,13 @@ func (service *Service) createPreparedStmts() error {
 									ON image_albums.image_id=images.id 
 									WHERE albums.id=?
 									ORDER BY image_albums.id DESC`,
+		keyQueryGetAlbumsOfImage: `SELECT albums.id, albums.title, albums.description, albums.created_at, albums.cover_id
+									FROM images JOIN image_albums 
+									ON images.id=image_albums.image_id 
+									JOIN albums 
+									ON image_albums.album_id=albums.id 
+									WHERE images.id=?
+									ORDER BY image_albums.id DESC`,
 		keyQueryGetAlbumsWithTag: `SELECT albums.id, albums.title, albums.description, albums.created_at, albums.cover_id
 									FROM tags JOIN album_tags
 									ON tags.id=album_tags.tag_id
@@ -57,6 +67,13 @@ func (service *Service) createPreparedStmts() error {
 									WHERE tags.id=?
 									ORDER BY album_tags.id DESC
 									LIMIT ?, ?`,
+		keyQueryGetTagsOfAlbum: `SELECT tags.id, tags.name
+								FROM albums JOIN album_tags
+								ON albums.id=album_tags.album_id
+								JOIN tags
+								ON album_tags.tag_id=tags.id
+								WHERE albums.id=?
+								ORDER BY tags.id DESC`,
 		keyQueryGetImagesWithTag: `SELECT images.id, images.path, images.width, images.height, images.thumbnail, images.width_thumb, images.height_thumb, images.title, images.description, images.created_at
 									FROM tags JOIN image_tags
 									ON tags.id=image_tags.tag_id
@@ -65,6 +82,13 @@ func (service *Service) createPreparedStmts() error {
 									WHERE tags.id=?
 									ORDER BY image_tags.id DESC
 									LIMIT ?, ?`,
+		keyQueryGetTagsOfImage: `SELECT tags.id, tags.name
+								FROM images JOIN image_tags
+								ON images.id=image_tags.image_id
+								JOIN tags
+								ON image_tags.tag_id=tags.id
+								WHERE images.id=?
+								ORDER BY tags.id DESC`,
 	}
 
 	var err error

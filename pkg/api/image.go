@@ -40,8 +40,10 @@ func (handler Handler) ImageRouterPublic() chi.Router {
 	r.With(Pagination).Get("/", handler.GetImages) // GET /images
 
 	r.Route("/{imageID}", func(r chi.Router) {
-		r.Use(handler.ImageCtx)      // Load the *Image on the request context
-		r.Get("/", handler.GetImage) // GET /images/123
+		r.Use(handler.ImageCtx)                  // Load the *Image on the request context
+		r.Get("/", handler.GetImage)             // GET /images/123
+		r.Get("/albums", handler.GetImageAlbums) // GET /images/123/albums
+		r.Get("/tags", handler.GetTagsOfImage)   // GET /images/123/tags
 	})
 
 	return r
@@ -61,6 +63,9 @@ func (handler Handler) ImageRouterProtected() chi.Router {
 		r.Delete("/", handler.DeleteImage) // DELETE /admin/images/123
 
 		r.Delete("/tags/{tagID}", handler.RemoveTagFromImage) // DELETE /admin/images/123/tags/789
+
+		r.Get("/albums", handler.GetImageAlbums) // GET /admin/images/123/albums
+		r.Get("/tags", handler.GetTagsOfImage)   // GET /admin/images/123/tags
 	})
 
 	return r
@@ -142,6 +147,38 @@ func (handler Handler) ImageCtx(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), imageKey, image)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// GetTagsOfImage returns all the tags associated with an image
+func (handler Handler) GetTagsOfImage(w http.ResponseWriter, r *http.Request) {
+	image := r.Context().Value(imageKey).(*cameraroll.Image)
+
+	tags, err := handler.Service.GetTagsOfImage(r.Context(), image.ID)
+	if err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	if err := render.RenderList(w, r, NewTagListResponse(tags)); err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+}
+
+// GetImageAlbums returns all the albums that an image belongs to
+func (handler Handler) GetImageAlbums(w http.ResponseWriter, r *http.Request) {
+	image := r.Context().Value(imageKey).(*cameraroll.Image)
+
+	albums, err := handler.Service.GetAlbumsOfImage(r.Context(), image.ID)
+	if err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	if err := render.RenderList(w, r, NewAlbumListResponse(albums)); err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 }
 
 // RemoveTagFromImage removes a tag from the image

@@ -11,5 +11,6 @@ type AlbumImage struct {
 type AlbumImageService interface {
 	AddImageToAlbum(ctx context.Context, albumID int64, imageID int64) error
 	GetImagesFromAlbum(ctx context.Context, id int64) ([]*Image, error)
+	GetAlbumsOfImage(ctx context.Context, id int64) ([]*Album, error)
 	RemoveImageFromAlbum(ctx context.Context, albumID int64, imageID int64) error
 }
