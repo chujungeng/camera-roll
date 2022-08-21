@@ -19,6 +19,7 @@ const (
 	keyQueryGetAlbums          = "GetAlbums"
 	keyQueryGetAlbumByID       = "GetAlbumByID"
 	keyQueryGetImagesFromAlbum = "GetImagesFromAlbum"
+	keyQueryGetCoverOfAlbum    = "GetCoverOfAlbum"
 	keyQueryGetAlbumsOfImage   = "GetAlbumsOfImage"
 	keyQueryGetAlbumsWithTag   = "GetAlbumsWithTag"
 	keyQueryGetTagsOfAlbum     = "GetTagsOfAlbum"
@@ -52,14 +53,21 @@ func (service *Service) createPreparedStmts() error {
 									ON image_albums.image_id=images.id 
 									WHERE albums.id=?
 									ORDER BY image_albums.id DESC`,
-		keyQueryGetAlbumsOfImage: `SELECT albums.id, albums.title, albums.description, albums.created_at, albums.cover_id
+		keyQueryGetCoverOfAlbum: `SELECT images.id, images.path, images.width, images.height, images.thumbnail, images.width_thumb, images.height_thumb, images.title, images.description, images.created_at
+									FROM albums JOIN image_albums 
+									ON albums.id=image_albums.album_id 
+									JOIN images 
+									ON image_albums.image_id=images.id 
+									WHERE albums.id=?
+									ORDER BY image_albums.id DESC LIMIT 1`,
+		keyQueryGetAlbumsOfImage: `SELECT albums.id, albums.title, albums.description, albums.created_at
 									FROM images JOIN image_albums 
 									ON images.id=image_albums.image_id 
 									JOIN albums 
 									ON image_albums.album_id=albums.id 
 									WHERE images.id=?
 									ORDER BY image_albums.id DESC`,
-		keyQueryGetAlbumsWithTag: `SELECT albums.id, albums.title, albums.description, albums.created_at, albums.cover_id
+		keyQueryGetAlbumsWithTag: `SELECT albums.id, albums.title, albums.description, albums.created_at
 									FROM tags JOIN album_tags
 									ON tags.id=album_tags.tag_id
 									JOIN albums

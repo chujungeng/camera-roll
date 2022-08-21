@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"chujungeng/camera-roll/pkg/cameraroll"
@@ -100,6 +101,55 @@ func (service Service) GetImagesFromAlbum(ctx context.Context, id int64) ([]*cam
 	return images, nil
 }
 
+// GetCoverOfAlbum gets the album cover of an album
+func (service Service) GetCoverOfAlbum(ctx context.Context, id int64) (*cameraroll.Image, error) {
+	img := cameraroll.Image{}
+
+	// find prepared statement
+	stmt := service.preparedStmts[keyQueryGetCoverOfAlbum]
+	if stmt == nil {
+		return nil, fmt.Errorf("GetCoverOfAlbum [%d]: Cannot find prepared sql query", id)
+	}
+
+	// start a transaction
+	tx, err := service.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetCoverOfAlbum[%d]: %v", id, err)
+	}
+	defer tx.Rollback()
+
+	txStmt := tx.StmtContext(ctx, stmt)
+
+	// execute the query
+	row := txStmt.QueryRowContext(ctx, id)
+
+	// parse response
+	if err := row.Scan(
+		&img.ID,
+		&img.Path,
+		&img.Width,
+		&img.Height,
+		&img.Thumbnail,
+		&img.ThumbnailWidth,
+		&img.ThumbnailHeight,
+		&img.Title,
+		&img.Description,
+		&img.CreatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("GetCoverOfAlbum[%d]: no such image", id)
+		}
+
+		return nil, fmt.Errorf("GetCoverOfAlbum[%d]: %v", id, err)
+	}
+
+	// commit the transaction
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("GetCoverOfAlbum[%d]: %v", id, err)
+	}
+
+	return &img, nil
+}
+
 // GetAlbumsOfImage gets all the albums that an image belongs to
 func (service Service) GetAlbumsOfImage(ctx context.Context, id int64) ([]*cameraroll.Album, error) {
 	// Album slice to hold the data from database query
@@ -133,7 +183,7 @@ func (service Service) GetAlbumsOfImage(ctx context.Context, id int64) ([]*camer
 	// parse response
 	for rows.Next() {
 		alb := cameraroll.Album{}
-		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CreatedAt, &alb.CoverID); err != nil {
+		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetAlbumsOfImage id[%d]: %v", id, err)
 		}
 
@@ -148,12 +198,7 @@ func (service Service) GetAlbumsOfImage(ctx context.Context, id int64) ([]*camer
 
 	// query database for album covers
 	for _, alb := range albums {
-		if alb.CoverID.Valid {
-			img, _ := service.GetImageByID(ctx, alb.CoverID.Int64)
-			if img != nil {
-				alb.Cover = img
-			}
-		}
+		alb.Cover, _ = service.GetCoverOfAlbum(ctx, alb.ID)
 	}
 
 	return albums, nil

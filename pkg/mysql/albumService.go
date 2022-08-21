@@ -41,7 +41,7 @@ func (service Service) DeleteAlbumByID(ctx context.Context, id int64) error {
 	return nil
 }
 
-// UpdateAlbumByID updates an album's title, description and cover_id
+// UpdateAlbumByID updates an album's title and description
 func (service Service) UpdateAlbumByID(ctx context.Context, id int64, newAlb *cameraroll.Album) error {
 	if newAlb == nil {
 		return fmt.Errorf("UpdateAlbumByID [%d]: null pointer error", id)
@@ -57,11 +57,10 @@ func (service Service) UpdateAlbumByID(ctx context.Context, id int64, newAlb *ca
 	// execute the query
 	result, err := tx.ExecContext(ctx,
 		`UPDATE albums 
-		SET title=?, description=?, cover_id=? 
+		SET title=?, description=? 
 		WHERE id=?`,
 		newAlb.Title,
 		newAlb.Description,
-		newAlb.CoverID,
 		id)
 
 	// check if the query failed
@@ -105,7 +104,7 @@ func (service Service) GetAlbumByID(ctx context.Context, id int64) (*cameraroll.
 	row := txStmt.QueryRowContext(ctx, id)
 
 	// parse response
-	if err := row.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CreatedAt, &alb.CoverID); err != nil {
+	if err := row.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("GetAlbumByID[%d]: no such album", id)
 		}
@@ -119,12 +118,7 @@ func (service Service) GetAlbumByID(ctx context.Context, id int64) (*cameraroll.
 	}
 
 	// query database for album cover
-	if alb.CoverID.Valid {
-		img, _ := service.GetImageByID(ctx, alb.CoverID.Int64)
-		if img != nil {
-			alb.Cover = img
-		}
-	}
+	alb.Cover, _ = service.GetCoverOfAlbum(ctx, alb.ID)
 
 	return &alb, nil
 }
@@ -162,7 +156,7 @@ func (service Service) GetAlbums(ctx context.Context, start uint64, count uint64
 	// parse response
 	for rows.Next() {
 		alb := cameraroll.Album{}
-		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CreatedAt, &alb.CoverID); err != nil {
+		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetAlbums start[%d] count[%d]: %v", start, count, err)
 		}
 
@@ -177,12 +171,7 @@ func (service Service) GetAlbums(ctx context.Context, start uint64, count uint64
 
 	// query database for album covers
 	for _, alb := range albums {
-		if alb.CoverID.Valid {
-			img, _ := service.GetImageByID(ctx, alb.CoverID.Int64)
-			if img != nil {
-				alb.Cover = img
-			}
-		}
+		alb.Cover, _ = service.GetCoverOfAlbum(ctx, alb.ID)
 	}
 
 	return albums, nil
@@ -205,20 +194,11 @@ func (service Service) AddAlbum(ctx context.Context, album *cameraroll.Album) er
 	// execute the query
 	var result sql.Result
 
-	if album.CoverID.Valid {
-		result, err = tx.ExecContext(ctx,
-			`INSERT INTO albums (title, description, cover_id) 
-			VALUES (?, ?, ?)`,
-			album.Title,
-			album.Description,
-			album.CoverID)
-	} else {
-		result, err = tx.ExecContext(ctx,
-			`INSERT INTO albums (title, description)
-			VALUES (?, ?)`,
-			album.Title,
-			album.Description)
-	}
+	result, err = tx.ExecContext(ctx,
+		`INSERT INTO albums (title, description)
+		VALUES (?, ?)`,
+		album.Title,
+		album.Description)
 
 	// check if the query failed
 	if err != nil {

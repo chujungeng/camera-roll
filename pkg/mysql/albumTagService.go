@@ -75,7 +75,7 @@ func (service Service) GetAlbumsWithTag(ctx context.Context, tagID int64, start 
 	// parse response
 	for rows.Next() {
 		alb := cameraroll.Album{}
-		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CreatedAt, &alb.CoverID); err != nil {
+		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Description, &alb.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetAlbumsWithTag[%d] start[%d] count[%d]: %v", tagID, start, count, err)
 		}
 
@@ -90,12 +90,7 @@ func (service Service) GetAlbumsWithTag(ctx context.Context, tagID int64, start 
 
 	// query database for album covers
 	for _, alb := range albums {
-		if alb.CoverID.Valid {
-			img, _ := service.GetImageByID(ctx, alb.CoverID.Int64)
-			if img != nil {
-				alb.Cover = img
-			}
-		}
+		alb.Cover, _ = service.GetCoverOfAlbum(ctx, alb.ID)
 	}
 
 	return albums, nil

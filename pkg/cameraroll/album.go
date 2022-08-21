@@ -2,17 +2,15 @@ package cameraroll
 
 import (
 	"context"
-	"database/sql"
 	"time"
 )
 
 type Album struct {
-	ID          int64         `json:"id"`
-	CreatedAt   time.Time     `json:"created_at,omitempty"`
-	Title       string        `json:"title,omitempty"`
-	Description string        `json:"description,omitempty"`
-	CoverID     sql.NullInt64 `json:"cover_id,omitempty"`
-	Cover       *Image        `json:"cover,omitempty"`
+	ID          int64     `json:"id"`
+	CreatedAt   time.Time `json:"created_at,omitempty"`
+	Title       string    `json:"title,omitempty"`
+	Description string    `json:"description,omitempty"`
+	Cover       *Image    `json:"cover,omitempty"`
 }
 
 type AlbumService interface {
