@@ -60,6 +60,12 @@ upload an image
 GET /images/{imageID}  
 get the image with id  
 
+GET /images/{imageID}/albums  
+get all the albums this image belongs to  
+
+GET /images/{imageID}/tags  
+get all the tags this image belongs to  
+
 PUT /admin/images/{imageID}  
 modify image with id  
 
@@ -96,6 +102,9 @@ remove album
 GET /albums/{albumID}/images  
 get all images from an album  
 
+GET /albums/{albumID}/tags  
+get all the tags this album belongs to  
+
 POST /admin/albumImages  
 add an image to the album  
 
@@ -119,3 +128,7 @@ add tag to image
 
 DELETE /admin/tags/{tagID}/images/{imageID}  
 remove the tag from the image  
+
+POST /token/google  
+verifies an GoogleID token and responds with an admin JWT if the GoogleID matches admin's  
+GoogleID token could be obtained from frontend's OAuth flow  
