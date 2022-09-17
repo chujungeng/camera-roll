@@ -1,11 +1,7 @@
-package api
+package routes
 
 import (
-	"net/http"
-
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 )
@@ -61,33 +57,6 @@ func (handler Handler) ApiRouter() chi.Router {
 
 		r.Mount("/admin", handler.ApiRouterProtected())
 	})
-
-	return r
-}
-
-// Routes is the collection of all routes being served
-func (handler Handler) Routes() http.Handler {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.URLFormat)
-
-	// CORS policies
-	r.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins:   handler.corsOrigin,
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	}))
-
-	r.Mount("/", handler.ApiRouter())
-
-	// Create a route along /assets that will serve contents from
-	// the ./public/ folder.
-	FileServer(r, staticFileURL, http.Dir(StaticFileDir()))
 
 	return r
 }

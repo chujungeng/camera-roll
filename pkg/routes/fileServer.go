@@ -1,4 +1,4 @@
-package api
+package routes
 
 import (
 	"errors"
@@ -15,8 +15,9 @@ import (
 
 const (
 	staticFileFolder  = "public"
+	clientFileFolder  = "client"
 	deletedFileFolder = "deleted"
-	staticFileURL     = "/assets"
+	staticFileURL     = "/assets/"
 )
 
 func fileDirectoryPath(dirname string) string {
@@ -47,6 +48,10 @@ func StaticFileDir() string {
 
 func DeletedFileDir() string {
 	return fileDirectoryPath(deletedFileFolder)
+}
+
+func ClientFileDir() string {
+	return fileDirectoryPath(clientFileFolder)
 }
 
 func DeleteAssetFromFilesystem(assetURL string) {
@@ -116,5 +121,19 @@ func FileServer(r chi.Router, path string, root http.Dir) {
 		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
 		fs := http.StripPrefix(pathPrefix, http.FileServer(FsWithoutDirListing{root}))
 		fs.ServeHTTP(w, r)
+	})
+}
+
+// RootServer is serving static files.
+func RootServer(router *chi.Mux) {
+	root := ClientFileDir()
+	fs := http.FileServer(http.Dir(root))
+
+	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := os.Stat(root + r.RequestURI); os.IsNotExist(err) {
+			http.StripPrefix(r.RequestURI, fs).ServeHTTP(w, r)
+		} else {
+			fs.ServeHTTP(w, r)
+		}
 	})
 }

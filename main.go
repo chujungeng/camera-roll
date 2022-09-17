@@ -12,9 +12,9 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
-	"chujungeng/camera-roll/pkg/api"
 	"chujungeng/camera-roll/pkg/config"
 	"chujungeng/camera-roll/pkg/mysql"
+	"chujungeng/camera-roll/pkg/routes"
 	"chujungeng/camera-roll/pkg/url"
 )
 
@@ -68,11 +68,11 @@ func main() {
 	}
 
 	// Create a new handler
-	mysqlHandler := api.NewHandler(dbService, options.RootURL, options.CorsOrigin, options.JWTSecret, options.AdminID, googleOauthConfig)
+	handler := routes.NewHandler(dbService, options.RootURL, options.CorsOrigin, options.JWTSecret, options.AdminID, googleOauthConfig)
 
 	// Print a JWT token for debug
 	if options.Mode != config.ProdMode {
-		testToken := mysqlHandler.GenerateTestJWT()
+		testToken := handler.GenerateTestJWT()
 		log.Printf("JWT Secret: %s", options.JWTSecret)
 		log.Printf("JWT: %s", testToken)
 	}
@@ -83,7 +83,7 @@ func main() {
 	// Create an HTTP server
 	srv := &http.Server{
 		Addr:    serverAddr,
-		Handler: mysqlHandler.Routes(),
+		Handler: handler.Routes(),
 	}
 
 	// Initializing the server in a goroutine so that

@@ -1,4 +1,4 @@
-package api
+package routes
 
 import (
 	"context"
@@ -441,11 +441,11 @@ func (handler Handler) AddImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// update the image's path
-	imagePath := url.Join(handler.rootURL, staticFileURL, fileNameNew)
+	imagePath := url.Join(handler.rootURL, StaticAssetURL(), fileNameNew)
 	imageReq.Path = imagePath
 
 	// update thumbnail path
-	thumbnailPath := url.Join(handler.rootURL, staticFileURL, thumbnail.Path)
+	thumbnailPath := url.Join(handler.rootURL, StaticAssetURL(), thumbnail.Path)
 	imageReq.Thumbnail = thumbnailPath
 
 	// update image stats

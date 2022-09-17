@@ -17,12 +17,13 @@ They don't make sense in the world of aperture, shutter speed and ISO.
 - headless CMS with RESTful APIs written in Go
 - image hosting that supports thumbnails, tags and albums
 - JSON Web Token(JWT) based access control
-- OAuth for admin access, no password required
+- OAuth for admin access, no password required (Development In Progress)
 
 ## Dependencies
 
 - MySQL 8.0
 - Google OAuth API
+- npm
 
 ## Usage
 
@@ -51,84 +52,84 @@ Photos with tag "portrait":
 
 ## API Endpoints
 
-GET /images  
+GET /api/images  
 get all images  
 
-POST /admin/images  
+POST /api/admin/images  
 upload an image  
 
-GET /images/{imageID}  
+GET /api/images/{imageID}  
 get the image with id  
 
-GET /images/{imageID}/albums  
+GET /api/images/{imageID}/albums  
 get all the albums this image belongs to  
 
-GET /images/{imageID}/tags  
+GET /api/images/{imageID}/tags  
 get all the tags this image belongs to  
 
-PUT /admin/images/{imageID}  
+PUT /api/admin/images/{imageID}  
 modify image with id  
 
-DELETE /admin/images/{imageID}  
+DELETE /api/admin/images/{imageID}  
 delete image with id  
 
-GET /tags  
+GET /api/tags  
 list all tags  
 
-POST /admin/tags  
+POST /api/admin/tags  
 add a new tag  
 
-PUT /admin/tags/{tagID}  
+PUT /api/admin/tags/{tagID}  
 modify tag with id  
 
-DELETE /admin/tags/{tagID}  
+DELETE /api/admin/tags/{tagID}  
 delete tag with id  
 
-GET /albums  
+GET /api/albums  
 retrieve all albums  
 
-POST /admin/albums  
+POST /api/admin/albums  
 add a new album with no pictures in it  
 
-GET /albums/{albumID}  
+GET /api/albums/{albumID}  
 get the album with albumID  
 
-PUT /admin/albums/{albumID}  
+PUT /api/admin/albums/{albumID}  
 modify album info  
 
-DELETE /admin/albums/{albumID}  
+DELETE /api/admin/albums/{albumID}  
 remove album  
 
-GET /albums/{albumID}/images  
+GET /api/albums/{albumID}/images  
 get all images from an album  
 
-GET /albums/{albumID}/tags  
+GET /api/albums/{albumID}/tags  
 get all the tags this album belongs to  
 
-POST /admin/albumImages  
+POST /api/admin/albumImages  
 add an image to the album  
 
-DELETE /admin/albums/{albumID}/images/{imageID}  
+DELETE /api/admin/albums/{albumID}/images/{imageID}  
 remove a picture from the album  
 
-GET /tags/{tagID}/albums  
+GET /api/tags/{tagID}/albums  
 get all albums under the tag  
 
-POST /admin/albumTags  
+POST /api/admin/albumTags  
 add tag to the albums  
 
-DELETE /admin/tags/{tagID}/albums/{albumID}  
+DELETE /api/admin/tags/{tagID}/albums/{albumID}  
 remove the tag from an album  
 
-GET /tags/{tagID}/images  
+GET /api/tags/{tagID}/images  
 get all images under the tag with tagID  
 
-POST /admin/imageTags  
+POST /api/admin/imageTags  
 add tag to image  
 
-DELETE /admin/tags/{tagID}/images/{imageID}  
+DELETE /api/admin/tags/{tagID}/images/{imageID}  
 remove the tag from the image  
 
-POST /token/google  
+POST /api/token/google  
 verifies an GoogleID token and responds with an admin JWT if the GoogleID matches admin's  
 GoogleID token could be obtained from frontend's OAuth flow  
