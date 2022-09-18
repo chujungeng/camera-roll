@@ -62,6 +62,7 @@ func (handler Handler) Routes() http.Handler {
 	FileServer(r, StaticAssetURL(), http.Dir(StaticFileDir()))
 
 	r.Mount("/api/", handler.ApiRouter())
+	r.Mount("/auth/", handler.AuthRouter())
 
 	return r
 }

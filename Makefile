@@ -34,3 +34,4 @@ clean:
 	rm -f ./bin/config.json
 	rm -rf ./bin/migration
 	rm -rf ./bin/client
+	rm -rf ./client/build
