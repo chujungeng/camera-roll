@@ -17,7 +17,7 @@ They don't make sense in the world of aperture, shutter speed and ISO.
 - headless CMS with RESTful APIs written in Go
 - image hosting that supports thumbnails, tags and albums
 - JSON Web Token(JWT) based access control
-- OAuth for admin access, no password required (Development In Progress)
+- OAuth for admin access, no password required  
 
 ## Dependencies
 
@@ -131,5 +131,6 @@ DELETE /api/admin/tags/{tagID}/images/{imageID}
 remove the tag from the image  
 
 POST /api/token/google  
-verifies an GoogleID token and responds with an admin JWT if the GoogleID matches admin's  
-GoogleID token could be obtained from frontend's OAuth flow  
+verifies an GoogleID token and responds with an admin JWT if the GoogleID matches admin's.  
+GoogleID token could be obtained from frontend's OAuth flow.  
+with the default admin area, there is no need for this endpoint.  

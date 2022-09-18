@@ -70,6 +70,9 @@ export default function Images() {
         id: img.id,
         src: img.thumbnail,
         handleOnClick: () => {navigate(`/images/${img.id}`, {replace: false})},
+        handleDelete: () => {
+            axios.delete(`${apiServer}images/${img.id}`).then(setImages(prevImages => prevImages.filter(i => i.id != img.id)));
+        },
     }));
 
     return (
@@ -93,8 +96,8 @@ export default function Images() {
                 >
                     <Filmstrip 
                         photos={photos}
-                        danger={deletion}
-                        handleAddNew={()=>{console.log('not yet implemented')}}
+                        enableSelection={false}
+                        onClick={(idx) => {deletion? photos[idx].handleDelete(): photos[idx].handleOnClick()}}
                     />
                 </InfiniteScroll>
             </Container>

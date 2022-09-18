@@ -131,8 +131,8 @@ export default function Album() {
 
                 <Filmstrip 
                     photos={photos}
-                    danger={deletion}
-                    handleAddNew={()=>{console.log('not yet implemented')}}
+                    enableSelection={deletion}
+                    onClick={(idx) => {photos[idx].handleOnClick()}}
                 />
             </Container>
         </main>

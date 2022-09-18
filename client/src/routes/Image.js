@@ -147,8 +147,8 @@ export default function Image() {
 
                 <Filmstrip 
                     photos={photos}
-                    danger={deletion}
-                    handleAddNew={()=>{console.log('not yet implemented')}}
+                    enableSelection={deletion}
+                    onClick={(idx) => {photos[idx].handleOnClick()}}
                 />
             </Container>
             

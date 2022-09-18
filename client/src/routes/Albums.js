@@ -71,6 +71,9 @@ export default function Albums() {
         id: alb.id,
         src: alb.cover? alb.cover.thumbnail: '/default.svg',
         handleOnClick: () => {navigate(`/albums/${alb.id}`, {replace: false})},
+        handleDelete: () => {
+            axios.delete(`${apiServer}albums/${alb.id}`).then(setAlbums(prevAlbums => prevAlbums.filter(i => i.id != alb.id)));
+        },
     }));
 
     return (
@@ -93,8 +96,8 @@ export default function Albums() {
                 >
                     <Filmstrip 
                         photos={photos}
-                        danger={deletion}
-                        handleAddNew={()=>{console.log('not yet implemented')}}
+                        enableSelection={false}
+                        onClick={(idx) => {deletion? photos[idx].handleDelete(): photos[idx].handleOnClick()}}
                     />
                 </InfiniteScroll>
             </Container>
