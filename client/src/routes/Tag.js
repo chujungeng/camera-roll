@@ -32,23 +32,23 @@ export default function Tag(props) {
     const [activeIndex, setActiveIndex] = useState(-1);
     const apiServer = useSelector((state) => state.api.root);
     const navigate = useNavigate();
-
-    const axiosInstance = axios.create();
     const dispatch = useDispatch();
 
-    axiosInstance.interceptors.response.use(
-        (response) => response,
-            (error) => {
-                if (error.response.status === 401) {
-                    dispatch(logOut());
-                    return error.response;
-                }
-    
-                return Promise.reject(error);
-            }
-    )
-
     useEffect(() => {
+        const axiosInstance = axios.create();
+
+        axiosInstance.interceptors.response.use(
+            (response) => response,
+                (error) => {
+                    if (error.response.status === 401) {
+                        dispatch(logOut());
+                        return error.response;
+                    }
+        
+                    return Promise.reject(error);
+                }
+        )
+
         axiosInstance.get(`${apiServer}tags/${tagID}`)
             .then(res => {
                 setTag(res.data);
@@ -57,9 +57,23 @@ export default function Tag(props) {
                     // console.log(error.response.data); // => the response payload 
                 }
             });
-    }, [apiServer, tagID, navigate, axiosInstance]);
+    }, [apiServer, tagID, navigate, dispatch]);
 
     useEffect(() => {
+        const axiosInstance = axios.create();
+
+        axiosInstance.interceptors.response.use(
+            (response) => response,
+                (error) => {
+                    if (error.response.status === 401) {
+                        dispatch(logOut());
+                        return error.response;
+                    }
+        
+                    return Promise.reject(error);
+                }
+        )
+
         if (activeView >= 0 && activeView < views.length) {
             axiosInstance.get(`${apiServer}tags/${tagID}/${views[activeView]}`)
             .then(res => {
@@ -76,7 +90,7 @@ export default function Tag(props) {
                 }
             });
         }
-    }, [apiServer, tagID, activeView, axiosInstance]);
+    }, [apiServer, tagID, activeView, dispatch]);
 
     const toggleView = useCallback(() => {
         setActiveView(curr => (curr + 1) % views.length);
@@ -85,7 +99,7 @@ export default function Tag(props) {
     const fetchMoreData = useCallback(() => {
         const nextPage = page + 1;
         let canceled = false;
-        axiosInstance.get(`${apiServer}tags/${tagID}/${views[activeView]}?page=${nextPage}`)
+        axios.get(`${apiServer}tags/${tagID}/${views[activeView]}?page=${nextPage}`)
             .then(res => {
                 if (!canceled) {
                     if (Array.isArray(res.data) && res.data.length !== 0) {
@@ -100,12 +114,10 @@ export default function Tag(props) {
                     }
                 }
             }).catch(function (error) {
-                if( error.response ){
-                    // console.log(error.response.data); // => the response payload 
-                }
+                setHasMore(false);
             });
         return () => (canceled = true);
-    }, [apiServer, tagID, page, activeView, axiosInstance]);
+    }, [apiServer, tagID, page, activeView]);
 
     const photos = activeView === 0? 
         images.map((img) => ({

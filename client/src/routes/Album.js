@@ -18,24 +18,25 @@ export default function Album() {
     const [images, setImages] = useState([]);
     const [tags, setTags] = useState([]);
     const [deletion, setDeletion] = useState(false);
-
     const navigate = useNavigate();
-    const axiosInstance = axios.create();
     const dispatch = useDispatch();
 
-    axiosInstance.interceptors.response.use(
-    (response) => response,
-        (error) => {
-            if (error.response.status === 401) {
-                dispatch(logOut());
-                return error.response;
-            }
-
-            return Promise.reject(error);
-        }
-    )
 
     useEffect(() => {
+        const axiosInstance = axios.create();
+
+        axiosInstance.interceptors.response.use(
+            (response) => response,
+                (error) => {
+                    if (error.response.status === 401) {
+                        dispatch(logOut());
+                        return error.response;
+                    }
+        
+                    return Promise.reject(error);
+                }
+        )
+
         axiosInstance.get(`${apiServer}albums/${albumID}`)
             .then(res => {
                 setAlbum(res.data);
@@ -62,7 +63,7 @@ export default function Album() {
                     // console.log(error.response.data); // => the response payload 
                 }
             });;
-    }, [apiServer, albumID, navigate, axiosInstance]);
+    }, [apiServer, albumID, navigate, dispatch]);
 
     const toggleDelete = useCallback(() => {
         setDeletion(curr => !curr);

@@ -29,6 +29,7 @@ func (handler Handler) ApiRouterProtected() chi.Router {
 	r.Mount("/tags", handler.TagRouterProtected())
 	r.Mount("/images", handler.ImageRouterProtected())
 	r.Mount("/imageTags", handler.ImageTagRouter())
+	r.Mount("/verify", handler.AdminRouter())
 
 	return r
 }

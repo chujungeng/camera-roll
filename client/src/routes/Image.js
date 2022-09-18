@@ -21,23 +21,23 @@ export default function Image() {
     const [deletion, setDeletion] = useState(false);
     const apiServer = useSelector((state) => state.api.root);
     const navigate = useNavigate();
-
-    const axiosInstance = axios.create();
     const dispatch = useDispatch();
 
-    axiosInstance.interceptors.response.use(
-        (response) => response,
-            (error) => {
-                if (error.response.status === 401) {
-                    dispatch(logOut());
-                    return error.response;
-                }
-    
-                return Promise.reject(error);
-            }
-    )
-
     useEffect(() => {
+        const axiosInstance = axios.create();
+
+        axiosInstance.interceptors.response.use(
+            (response) => response,
+                (error) => {
+                    if (error.response.status === 401) {
+                        dispatch(logOut());
+                        return error.response;
+                    }
+        
+                    return Promise.reject(error);
+                }
+        )
+
         axiosInstance.get(`${apiServer}images/${imageID}`)
             .then(res => {
                 setImage(res.data);
@@ -64,7 +64,7 @@ export default function Image() {
                     // console.log(error.response.data); // => the response payload 
                 }
             });
-    }, [apiServer, imageID, navigate, axiosInstance]);
+    }, [apiServer, imageID, navigate, dispatch]);
 
     const toggleDelete = useCallback(() => {
         setDeletion(curr => !curr);

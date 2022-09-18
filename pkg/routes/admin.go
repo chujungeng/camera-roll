@@ -4,9 +4,20 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth/v5"
+	"github.com/go-chi/render"
 	"github.com/lestrrat-go/jwx/jwt"
 )
+
+// AdminRouter verifies admin identity
+func (handler Handler) AdminRouter() chi.Router {
+	r := chi.NewRouter()
+
+	r.Get("/", handler.VerifyAdminStatus)
+
+	return r
+}
 
 // AdminOnly verifies if user_role is admin from the JWT claims
 func AdminOnly(next http.Handler) http.Handler {
@@ -51,4 +62,10 @@ func FromContext(ctx context.Context) (jwt.Token, map[string]interface{}, error)
 	err, _ = ctx.Value(jwtauth.ErrorCtxKey).(error)
 
 	return token, claims, err
+}
+
+// VerifyAdminStatus returns 200OK when the admin is logged in
+func (handler Handler) VerifyAdminStatus(w http.ResponseWriter, r *http.Request) {
+
+	render.Status(r, http.StatusOK)
 }
