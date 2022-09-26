@@ -56,7 +56,7 @@ export default function App() {
                 dispatch(logOut());
             });
 
-    }, []);
+    }, [apiServer, dispatch]);
 
     const isLoggedIn = useSelector((state) => state.auth.loggedIn);
     const appRoutes = useRoutes(routes(isLoggedIn));

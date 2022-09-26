@@ -66,13 +66,12 @@ export default function Albums() {
         setDeletion(curr => !curr);
     }, []);
 
-    // TODO: deletion route
     const photos = albums.map(alb => ({
         id: alb.id,
         src: alb.cover? alb.cover.thumbnail: '/default.svg',
         handleOnClick: () => {navigate(`/albums/${alb.id}`, {replace: false})},
         handleDelete: () => {
-            axios.delete(`${apiServer}albums/${alb.id}`).then(setAlbums(prevAlbums => prevAlbums.filter(i => i.id != alb.id)));
+            axios.delete(`${apiServer}albums/${alb.id}`).then(setAlbums(prevAlbums => prevAlbums.filter(i => i.id !== alb.id)));
         },
     }));
 
@@ -81,7 +80,7 @@ export default function Albums() {
             <Container>
                 <Row className="align-items-center p-1">
                     <Col className="d-flex justify-content-start">
-                        <span className="text-light mr-2">Deletion Mode</span>
+                        <span className="text-light mr-2">Delete Albums</span>
                         <Toggle
                             defaultChecked={false}
                             icons={false}
